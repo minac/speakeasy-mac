@@ -49,6 +49,7 @@ class SettingsViewModel: ObservableObject {
 
         appState.settings = newSettings
         appState.saveSettings()
+        appState.updateGlobalShortcuts() // Re-register shortcuts with new settings
 
         // Update original settings to reflect saved state
         originalSettings = newSettings
