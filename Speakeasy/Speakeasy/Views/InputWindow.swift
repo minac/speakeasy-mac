@@ -129,8 +129,16 @@ struct InputWindow: View {
         .padding()
         .frame(width: 600, height: 300)
         .onAppear {
-            // Activate the window so it can receive keyboard input
+            // Activate the app and bring window to front
             NSApp.activate(ignoringOtherApps: true)
+
+            // Ensure the window comes to the very front
+            DispatchQueue.main.async {
+                if let window = NSApp.windows.first(where: { $0.title == "Read Text" }) {
+                    window.makeKeyAndOrderFront(nil)
+                    window.orderFrontRegardless()
+                }
+            }
         }
     }
 
