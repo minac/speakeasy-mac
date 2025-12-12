@@ -11,11 +11,10 @@ struct SpeakeasyApp: App {
                 .environmentObject(appState)
         }
 
-        // Input window (will be implemented in Phase 4)
+        // Input window
         Window("Read Text", id: "input") {
-            PlaceholderInputWindow()
+            InputWindow(appState: appState)
                 .environmentObject(appState)
-                .frame(width: 600, height: 300)
         }
         .windowResizability(.contentSize)
         .defaultPosition(.center)
@@ -34,23 +33,6 @@ struct SpeakeasyApp: App {
 }
 
 // MARK: - Placeholder Views
-
-struct PlaceholderInputWindow: View {
-    @EnvironmentObject var appState: AppState
-
-    var body: some View {
-        VStack(spacing: 20) {
-            Text("Input Window")
-                .font(.title)
-            Text("Will be implemented in Phase 4")
-                .foregroundColor(.secondary)
-            Button("Close") {
-                // Window will close automatically
-            }
-        }
-        .padding()
-    }
-}
 
 struct PlaceholderSettingsWindow: View {
     @EnvironmentObject var appState: AppState
