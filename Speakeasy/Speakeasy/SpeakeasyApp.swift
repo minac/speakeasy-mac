@@ -20,11 +20,10 @@ struct SpeakeasyApp: App {
         .defaultPosition(.center)
         .keyboardShortcut("r", modifiers: [.command])
 
-        // Settings window (will be implemented in Phase 5)
+        // Settings window
         Window("Settings", id: "settings") {
-            PlaceholderSettingsWindow()
+            SettingsWindow(appState: appState)
                 .environmentObject(appState)
-                .frame(width: 500, height: 400)
         }
         .windowResizability(.contentSize)
         .defaultPosition(.center)
@@ -32,32 +31,3 @@ struct SpeakeasyApp: App {
     }
 }
 
-// MARK: - Placeholder Views
-
-struct PlaceholderSettingsWindow: View {
-    @EnvironmentObject var appState: AppState
-
-    var body: some View {
-        VStack(spacing: 20) {
-            Text("Settings Window")
-                .font(.title)
-            Text("Will be implemented in Phase 5")
-                .foregroundColor(.secondary)
-
-            Form {
-                LabeledContent("Voice") {
-                    Text(appState.currentVoice?.name ?? "Default")
-                }
-                LabeledContent("Speed") {
-                    Text(String(format: "%.1fx", appState.settings.uiSpeed))
-                }
-            }
-            .formStyle(.grouped)
-
-            Button("Close") {
-                // Window will close automatically
-            }
-        }
-        .padding()
-    }
-}
