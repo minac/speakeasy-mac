@@ -82,6 +82,10 @@ struct SettingsWindow: View {
             .padding()
         }
         .frame(width: 500, height: 450)
+        .onAppear {
+            // Activate the window so it can receive keyboard input
+            NSApp.activate(ignoringOtherApps: true)
+        }
     }
 
     // MARK: - Helpers
