@@ -169,6 +169,26 @@ Speakeasy/
 swift test
 ```
 
+### Viewing Logs
+
+Speakeasy uses structured logging via macOS Unified Logging (`os.Logger`). View logs in real-time:
+
+```bash
+# Stream logs while app is running
+log stream --predicate 'subsystem == "com.speakeasy.mac"' --level debug
+
+# Or use Console.app
+# 1. Open Console.app
+# 2. Filter by process name: "Speakeasy"
+# 3. Or filter by subsystem: "com.speakeasy.mac"
+```
+
+Log categories:
+- `speech` - TTS engine events
+- `extraction` - URL fetching and HTML parsing
+- `settings` - Settings persistence
+- `shortcuts` - Global keyboard shortcuts
+
 ### Design Principles
 
 - **TDD:** Tests written before implementation
