@@ -4,7 +4,6 @@ import SwiftUI
 class InputViewModel: ObservableObject {
     @Published var inputText: String = ""
     @Published var isProcessing: Bool = false
-    @Published var errorMessage: String?
 
     private let appState: AppState
 
@@ -16,8 +15,6 @@ class InputViewModel: ObservableObject {
     func play() async {
         guard !inputText.isEmpty else { return }
 
-        // Clear previous error
-        errorMessage = nil
         isProcessing = true
 
         defer {
@@ -36,6 +33,6 @@ class InputViewModel: ObservableObject {
     /// Clears the input text
     func clear() {
         inputText = ""
-        errorMessage = nil
+        appState.errorMessage = nil
     }
 }

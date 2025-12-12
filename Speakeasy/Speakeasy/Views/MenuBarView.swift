@@ -53,6 +53,18 @@ struct MenuBarView: View {
                 Spacer()
             }
 
+            // Progress indicator
+            if appState.playbackState == .speaking {
+                HStack {
+                    Text("\(Int(appState.speechProgress * 100))%")
+                        .font(.caption2)
+                        .foregroundColor(.secondary)
+                    Spacer()
+                }
+                ProgressView(value: appState.speechProgress)
+                    .progressViewStyle(.linear)
+            }
+
             HStack(spacing: 12) {
                 if appState.playbackState == .speaking {
                     Button {

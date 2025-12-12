@@ -40,7 +40,7 @@ struct InputWindow: View {
             }
 
             // Error message
-            if let error = viewModel.errorMessage {
+            if let error = appState.errorMessage {
                 HStack {
                     Image(systemName: "exclamationmark.triangle.fill")
                         .foregroundColor(.red)
@@ -60,6 +60,23 @@ struct InputWindow: View {
                         .font(.caption)
                         .foregroundColor(.secondary)
                     Spacer()
+                }
+            }
+
+            // Progress bar (when speaking)
+            if appState.playbackState == .speaking {
+                VStack(alignment: .leading, spacing: 4) {
+                    HStack {
+                        Text("Progress:")
+                            .font(.caption2)
+                            .foregroundColor(.secondary)
+                        Spacer()
+                        Text("\(Int(appState.speechProgress * 100))%")
+                            .font(.caption2)
+                            .foregroundColor(.secondary)
+                    }
+                    ProgressView(value: appState.speechProgress)
+                        .progressViewStyle(.linear)
                 }
             }
 
