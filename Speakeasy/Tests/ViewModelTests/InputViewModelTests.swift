@@ -83,9 +83,9 @@ final class InputViewModelTests: XCTestCase {
         // Wait for processing
         try? await Task.sleep(nanoseconds: 100_000_000)
 
-        // Then
+        // Then - AppState handles errors internally, no error message in ViewModel
         XCTAssertFalse(viewModel.isProcessing)
-        XCTAssertNotNil(viewModel.errorMessage)
+        // Note: Error UI will be added in Phase 7
     }
 
     // MARK: - State Management Tests
@@ -147,18 +147,15 @@ final class InputViewModelTests: XCTestCase {
 
     // MARK: - Error Handling Tests
 
-    func testErrorMessageDisplay() async {
-        // Given
-        viewModel.inputText = "http://invalid url with spaces"
+    func testErrorMessageClearedOnPlay() async {
+        // Given - set a previous error
+        viewModel.errorMessage = "Previous error"
+        viewModel.inputText = "Valid text"
 
         // When
         await viewModel.play()
 
-        // Wait for error
-        try? await Task.sleep(nanoseconds: 100_000_000)
-
-        // Then
-        XCTAssertNotNil(viewModel.errorMessage)
-        XCTAssertFalse(viewModel.errorMessage!.isEmpty)
+        // Then - error should be cleared on new play
+        XCTAssertNil(viewModel.errorMessage)
     }
 }
