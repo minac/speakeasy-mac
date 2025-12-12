@@ -154,7 +154,7 @@ class AppState: ObservableObject {
     private func setupGlobalShortcuts() {
         // Check for accessibility permissions
         guard PermissionsManager.hasAccessibilityPermissions() else {
-            print("⚠️ Accessibility permissions not granted. Global shortcuts disabled.")
+            AppLogger.shortcuts.warning("Accessibility permissions not granted. Global shortcuts disabled.")
             // Show alert after a brief delay to let the app finish launching
             Task { @MainActor in
                 try? await Task.sleep(nanoseconds: 1_000_000_000) // 1 second
