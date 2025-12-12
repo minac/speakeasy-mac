@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <!-- Application Properties -->
+    <key>CFBundleDisplayName</key>
+    <string>Speakeasy</string>
+    <key>CFBundleExecutable</key>
+    <string>$(EXECUTABLE_NAME)</string>
+    <key>CFBundleIdentifier</key>
+    <string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+    <key>CFBundleInfoDictionaryVersion</key>
+    <string>6.0</string>
+    <key>CFBundleName</key>
+    <string>$(PRODUCT_NAME)</string>
+    <key>CFBundlePackageType</key>
+    <string>$(PRODUCT_BUNDLE_PACKAGE_TYPE)</string>
+    <key>CFBundleShortVersionString</key>
+    <string>1.0</string>
+    <key>CFBundleVersion</key>
+    <string>1</string>
+
+    <!-- Hide from Dock (Menu Bar Only) -->
+    <key>LSUIElement</key>
+    <true/>
+
+    <!-- App Category -->
+    <key>LSApplicationCategoryType</key>
+    <string>public.app-category.utilities</string>
+
+    <!-- Permissions Descriptions -->
+    <key>NSAppleEventsUsageDescription</key>
+    <string>Speakeasy needs accessibility permissions to register global keyboard shortcuts.</string>
+
+    <!-- Minimum macOS Version -->
+    <key>LSMinimumSystemVersion</key>
+    <string>13.0</string>
+</dict>
+</plist>

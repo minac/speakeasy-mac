@@ -1,0 +1,50 @@
+# Xcode
+.DS_Store
+*.xcworkspace
+!*.xcworkspace/contents.xcworkspacedata
+*.xcuserstate
+*.xcuserdatad
+xcuserdata/
+DerivedData/
+.build/
+
+# Swift Package Manager
+.swiftpm/
+Package.resolved
+
+# CocoaPods
+Pods/
+*.podspec
+
+# Carthage
+Carthage/Build/
+
+# Accio
+Dependencies/
+.accio/
+
+# fastlane
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/screenshots/**/*.png
+fastlane/test_output
+
+# Code Injection
+iOSInjectionProject/
+
+# macOS
+.AppleDouble
+.LSOverride
+.Spotlight-V100
+.Trashes
+.VolumeIcon.icns
+.com.apple.timemachine.donotpresent
+.AppleDB
+.AppleDesktop
+Network Trash Folder
+Temporary Items
+.apdisk
+
+# Project-specific
+voices/
+screenshots/

@@ -1,0 +1,30 @@
+// swift-tools-version: 5.9
+import PackageDescription
+
+let package = Package(
+    name: "Speakeasy",
+    platforms: [
+        .macOS(.v13)
+    ],
+    products: [
+        .executable(
+            name: "Speakeasy",
+            targets: ["Speakeasy"]
+        )
+    ],
+    dependencies: [
+        .package(url: "https://github.com/scinfu/SwiftSoup.git", from: "2.6.0")
+    ],
+    targets: [
+        .executableTarget(
+            name: "Speakeasy",
+            dependencies: ["SwiftSoup"],
+            path: "Speakeasy"
+        ),
+        .testTarget(
+            name: "SpeakeasyTests",
+            dependencies: ["Speakeasy"],
+            path: "Tests"
+        )
+    ]
+)
