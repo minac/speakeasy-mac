@@ -27,7 +27,13 @@ Native macOS menu bar application for reading text and URLs aloud using Apple's 
 - Output directory selector with native file browser
 - Unsaved changes tracking
 - UserDefaults persistence with automatic save
-- Global keyboard shortcuts (planned)
+
+### ⌨️ Global Keyboard Shortcuts
+- System-wide hotkey support using Carbon Events API
+- Default shortcut: Cmd+Shift+P opens Input Window
+- Accessibility permissions management with user-friendly prompts
+- Automatic shortcut re-registration on settings change
+- Configurable shortcuts (stored in settings)
 
 ### 🎨 Menu Bar Integration
 - Lives in menu bar (no dock icon)
@@ -37,7 +43,7 @@ Native macOS menu bar application for reading text and URLs aloud using Apple's 
 
 ## Architecture
 
-### Current Implementation (Phases 1-5 Complete)
+### Current Implementation (Phases 1-6 Complete)
 
 **Core Components:**
 - `AppState` - Central @MainActor coordinator for all app state
@@ -45,6 +51,8 @@ Native macOS menu bar application for reading text and URLs aloud using Apple's 
 - `TextExtractor` - URLSession + SwiftSoup for web content extraction
 - `SettingsService` - UserDefaults persistence layer
 - `VoiceDiscoveryService` - System voice enumeration
+- `ShortcutManager` - Carbon Events API for global keyboard shortcuts
+- `PermissionsManager` - Accessibility permissions management
 
 **Models:**
 - `SpeechSettings` - Codable settings model with UI speed conversion
@@ -67,17 +75,18 @@ Native macOS menu bar application for reading text and URLs aloud using Apple's 
 - SettingsServiceTests - Persistence layer (7 tests)
 - InputViewModelTests - Input window logic (11 tests)
 - SettingsViewModelTests - Settings management (13 tests)
+- ShortcutManagerTests - Global shortcuts and permissions (11 tests)
 
-### Planned Features (Phases 6-7)
+### Planned Features (Phase 7)
 
-**Phase 6:** Global keyboard shortcuts (Carbon Events)
-**Phase 7:** Polish, error handling, progress tracking
+**Phase 7:** Polish, error handling, progress tracking, UI improvements
 
 ## Requirements
 
 - **macOS 13.0+** (for MenuBarExtra API)
 - **Xcode 14.0+** (for development)
 - **Swift 5.9+**
+- **Accessibility Permissions** (for global keyboard shortcuts)
 
 ## Installation
 
@@ -215,7 +224,7 @@ This project follows TDD. Before submitting PRs:
 - [x] Phase 3: Menu bar UI with AppState coordination
 - [x] Phase 4: Input window with text/URL entry
 - [x] Phase 5: Settings window with voice/speed/directory pickers
-- [ ] Phase 6: Global keyboard shortcuts (Carbon Events)
+- [x] Phase 6: Global keyboard shortcuts with accessibility permissions
 - [ ] Phase 7: Polish and error handling
 - [ ] Future: Audio export to WAV
 - [ ] Future: Clipboard monitoring
