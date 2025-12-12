@@ -7,11 +7,16 @@ class SettingsViewModel: ObservableObject {
         didSet { checkForChanges() }
     }
 
-    @Published var uiSpeed: Float {
-        didSet {
-            // Clamp to valid range
-            uiSpeed = max(0.5, min(2.0, uiSpeed))
-            checkForChanges()
+    private var _uiSpeed: Float = 1.0
+    var uiSpeed: Float {
+        get { _uiSpeed }
+        set {
+            let clamped = max(0.5, min(2.0, newValue))
+            if _uiSpeed != clamped {
+                objectWillChange.send()
+                _uiSpeed = clamped
+                checkForChanges()
+            }
         }
     }
 
@@ -33,7 +38,7 @@ class SettingsViewModel: ObservableObject {
 
         // Initialize from current settings
         self.selectedVoiceIdentifier = appState.settings.selectedVoiceIdentifier
-        self.uiSpeed = appState.settings.uiSpeed
+        self._uiSpeed = appState.settings.uiSpeed
         self.outputDirectory = appState.settings.outputDirectory
 
         // Load available voices

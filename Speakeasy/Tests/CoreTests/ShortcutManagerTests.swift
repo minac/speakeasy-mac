@@ -69,10 +69,7 @@ final class ShortcutManagerTests: XCTestCase {
     // MARK: - Registration Tests
 
     func testRegisterShortcut() {
-        var callbackInvoked = false
-        let callback = {
-            callbackInvoked = true
-        }
+        let callback = {}
 
         let success = manager.register(shortcut: "cmd+shift+t", action: callback)
 
@@ -109,12 +106,12 @@ final class ShortcutManagerTests: XCTestCase {
     // MARK: - Key Code Mapping Tests
 
     func testKeyCodeForCharacter() {
-        XCTAssertEqual(manager.keyCodeForCharacter("a"), kVK_ANSI_A)
-        XCTAssertEqual(manager.keyCodeForCharacter("p"), kVK_ANSI_P)
-        XCTAssertEqual(manager.keyCodeForCharacter("r"), kVK_ANSI_R)
-        XCTAssertEqual(manager.keyCodeForCharacter("s"), kVK_ANSI_S)
-        XCTAssertEqual(manager.keyCodeForCharacter("1"), kVK_ANSI_1)
-        XCTAssertEqual(manager.keyCodeForCharacter("0"), kVK_ANSI_0)
+        XCTAssertEqual(manager.keyCodeForCharacter("a"), UInt16(kVK_ANSI_A))
+        XCTAssertEqual(manager.keyCodeForCharacter("p"), UInt16(kVK_ANSI_P))
+        XCTAssertEqual(manager.keyCodeForCharacter("r"), UInt16(kVK_ANSI_R))
+        XCTAssertEqual(manager.keyCodeForCharacter("s"), UInt16(kVK_ANSI_S))
+        XCTAssertEqual(manager.keyCodeForCharacter("1"), UInt16(kVK_ANSI_1))
+        XCTAssertEqual(manager.keyCodeForCharacter("0"), UInt16(kVK_ANSI_0))
     }
 
     func testKeyCodeForCharacter_InvalidCharacter() {

@@ -19,7 +19,8 @@ let package = Package(
         .executableTarget(
             name: "Speakeasy",
             dependencies: ["SwiftSoup"],
-            path: "Speakeasy"
+            path: "Speakeasy",
+            exclude: ["Resources/Info.plist"]
         ),
         .testTarget(
             name: "SpeakeasyTests",
