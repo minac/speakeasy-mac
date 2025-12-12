@@ -6,6 +6,8 @@ class AppState: ObservableObject {
     @Published var playbackState: PlaybackState = .idle
     @Published var currentText: String = ""
     @Published var settings: SpeechSettings
+    @Published var errorMessage: String?
+    @Published var speechProgress: Double = 0.0
 
     // Window visibility
     @Published var showInputWindow = false
@@ -50,11 +52,25 @@ class AppState: ObservableObject {
     func speak(text: String) async {
         guard !text.isEmpty else { return }
 
+        // Clear previous errors
+        errorMessage = nil
+
         do {
             // Extract text from URL if needed
             let textToSpeak: String
             if text.isValidURL {
-                textToSpeak = try await textExtractor.extractText(from: text)
+                do {
+                    textToSpeak = try await textExtractor.extractText(from: text)
+                } catch {
+                    errorMessage = "Failed to extract text from URL: \(error.localizedDescription)"
+                    return
+                }
+
+                // Check for empty extracted text
+                guard !textToSpeak.isEmpty else {
+                    errorMessage = "No readable text found at URL"
+                    return
+                }
             } else {
                 textToSpeak = text
             }
@@ -62,14 +78,15 @@ class AppState: ObservableObject {
             currentText = textToSpeak
 
             // Speak with current settings
-            try await speechEngine.speak(
-                text: textToSpeak,
-                voiceIdentifier: settings.selectedVoiceIdentifier,
-                rate: settings.speechRate
-            )
-        } catch {
-            print("Error speaking text: \(error.localizedDescription)")
-            // TODO: Show error to user in Phase 7
+            do {
+                try await speechEngine.speak(
+                    text: textToSpeak,
+                    voiceIdentifier: settings.selectedVoiceIdentifier,
+                    rate: settings.speechRate
+                )
+            } catch {
+                errorMessage = "Failed to speak text: \(error.localizedDescription)"
+            }
         }
     }
 
@@ -84,6 +101,7 @@ class AppState: ObservableObject {
     func stop() {
         speechEngine.stop()
         currentText = ""
+        speechProgress = 0.0
     }
 
     // MARK: - Settings Management
@@ -110,13 +128,16 @@ class AppState: ObservableObject {
     // MARK: - Private Setup
 
     private func setupSpeechCallbacks() {
-        speechEngine.onProgress = { progress, total in
-            // TODO: Update progress UI in Phase 7
+        speechEngine.onProgress = { [weak self] progress, total in
+            Task { @MainActor [weak self] in
+                self?.speechProgress = progress
+            }
         }
 
         speechEngine.onComplete = { [weak self] in
             Task { @MainActor [weak self] in
                 self?.currentText = ""
+                self?.speechProgress = 0.0
             }
         }
 

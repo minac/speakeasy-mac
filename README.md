@@ -43,7 +43,7 @@ Native macOS menu bar application for reading text and URLs aloud using Apple's 
 
 ## Architecture
 
-### Current Implementation (Phases 1-6 Complete)
+### Current Implementation (All Phases Complete)
 
 **Core Components:**
 - `AppState` - Central @MainActor coordinator for all app state
@@ -77,9 +77,12 @@ Native macOS menu bar application for reading text and URLs aloud using Apple's 
 - SettingsViewModelTests - Settings management (13 tests)
 - ShortcutManagerTests - Global shortcuts and permissions (11 tests)
 
-### Planned Features (Phase 7)
+### Error Handling & Progress Tracking (Phase 7 - Complete)
 
-**Phase 7:** Polish, error handling, progress tracking, UI improvements
+- **Error Display**: User-friendly error messages shown in InputWindow
+- **Progress Tracking**: Real-time speech progress with percentage and progress bar
+- **Loading States**: Visual feedback during URL extraction and processing
+- **Context-Aware Errors**: Specific messages for URL extraction, speech, and validation failures
 
 ## Requirements
 
@@ -225,7 +228,7 @@ This project follows TDD. Before submitting PRs:
 - [x] Phase 4: Input window with text/URL entry
 - [x] Phase 5: Settings window with voice/speed/directory pickers
 - [x] Phase 6: Global keyboard shortcuts with accessibility permissions
-- [ ] Phase 7: Polish and error handling
+- [x] Phase 7: Polish and error handling
 - [ ] Future: Audio export to WAV
 - [ ] Future: Clipboard monitoring
 - [ ] Future: Voice customization (pitch, volume)

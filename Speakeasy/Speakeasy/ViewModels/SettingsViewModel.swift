@@ -15,8 +15,8 @@ class SettingsViewModel: ObservableObject {
             if _uiSpeed != clamped {
                 objectWillChange.send()
                 _uiSpeed = clamped
-                checkForChanges()
             }
+            checkForChanges()
         }
     }
 

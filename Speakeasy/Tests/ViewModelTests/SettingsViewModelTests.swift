@@ -58,13 +58,14 @@ final class SettingsViewModelTests: XCTestCase {
     func testChangeSpeed() {
         // Given
         let originalSpeed = viewModel.uiSpeed
+        let newSpeed: Float = originalSpeed == 1.5 ? 0.75 : 1.5
 
         // When
-        viewModel.uiSpeed = 1.5
+        viewModel.uiSpeed = newSpeed
 
         // Then
         XCTAssertNotEqual(viewModel.uiSpeed, originalSpeed)
-        XCTAssertEqual(viewModel.uiSpeed, 1.5)
+        XCTAssertEqual(viewModel.uiSpeed, newSpeed)
         XCTAssertTrue(viewModel.hasUnsavedChanges)
     }
 
@@ -87,7 +88,8 @@ final class SettingsViewModelTests: XCTestCase {
     func testChangeOutputDirectory() {
         // Given
         let originalDirectory = viewModel.outputDirectory
-        let newDirectory = FileManager.default.temporaryDirectory
+        // Use a directory that's guaranteed to be different
+        let newDirectory = originalDirectory.deletingLastPathComponent().appendingPathComponent("TestOutput")
 
         // When
         viewModel.outputDirectory = newDirectory
@@ -144,8 +146,9 @@ final class SettingsViewModelTests: XCTestCase {
         let originalSpeed = viewModel.uiSpeed
         let originalDirectory = viewModel.outputDirectory
 
-        // Make changes
-        viewModel.uiSpeed = 1.5
+        // Make changes (use a value different from original)
+        let newSpeed: Float = originalSpeed == 1.5 ? 0.75 : 1.5
+        viewModel.uiSpeed = newSpeed
         XCTAssertTrue(viewModel.hasUnsavedChanges)
 
         // When

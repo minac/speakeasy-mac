@@ -21,7 +21,7 @@ final class InputViewModelTests: XCTestCase {
     func testInitialState() {
         XCTAssertEqual(viewModel.inputText, "")
         XCTAssertFalse(viewModel.isProcessing)
-        XCTAssertNil(viewModel.errorMessage)
+        XCTAssertNil(appState.errorMessage)
     }
 
     // MARK: - Plain Text Tests
@@ -40,7 +40,7 @@ final class InputViewModelTests: XCTestCase {
         XCTAssertEqual(appState.playbackState, .speaking)
         XCTAssertEqual(appState.currentText, "Hello world")
         XCTAssertFalse(viewModel.isProcessing)
-        XCTAssertNil(viewModel.errorMessage)
+        XCTAssertNil(appState.errorMessage)
     }
 
     func testPlayWithEmptyText() async {
@@ -111,14 +111,14 @@ final class InputViewModelTests: XCTestCase {
 
     func testClearErrorOnNewPlay() async {
         // Given
-        viewModel.errorMessage = "Previous error"
+        appState.errorMessage = "Previous error"
         viewModel.inputText = "New text"
 
         // When
         await viewModel.play()
 
         // Then
-        XCTAssertNil(viewModel.errorMessage)
+        XCTAssertNil(appState.errorMessage)
     }
 
     func testStop() {
@@ -149,13 +149,13 @@ final class InputViewModelTests: XCTestCase {
 
     func testErrorMessageClearedOnPlay() async {
         // Given - set a previous error
-        viewModel.errorMessage = "Previous error"
+        appState.errorMessage = "Previous error"
         viewModel.inputText = "Valid text"
 
         // When
         await viewModel.play()
 
         // Then - error should be cleared on new play
-        XCTAssertNil(viewModel.errorMessage)
+        XCTAssertNil(appState.errorMessage)
     }
 }
