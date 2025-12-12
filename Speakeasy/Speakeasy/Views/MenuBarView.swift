@@ -14,12 +14,12 @@ struct MenuBarView: View {
 
             // Main actions
             Button("Read Text...") {
-                appState.openInputWindow()
+                openWindow(id: "input")
             }
             .keyboardShortcut("r", modifiers: [.command])
 
             Button("Settings...") {
-                appState.openSettingsWindow()
+                openWindow(id: "settings")
             }
             .keyboardShortcut(",", modifiers: [.command])
 
