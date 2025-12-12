@@ -129,8 +129,8 @@ struct InputWindow: View {
         .padding()
         .frame(width: 600, height: 300)
         .onAppear {
-            // Focus on text editor when window appears
-            // Note: TextEditor auto-focuses in SwiftUI
+            // Activate the window so it can receive keyboard input
+            NSApp.activate(ignoringOtherApps: true)
         }
     }
 

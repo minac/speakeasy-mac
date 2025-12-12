@@ -185,8 +185,19 @@ SpeechSettings.rateToUISpeed(_ rate: Float) -> Float
 ### Build & Test Commands
 
 ```bash
-# Build
+# Build executable only
 swift build
+
+# Build and create .app bundle (debug)
+./create-app-bundle.sh
+# or
+./create-app-bundle.sh debug
+
+# Build and create .app bundle (release)
+./create-app-bundle.sh release
+
+# Install to Applications
+cp -r build/Speakeasy.app /Applications/
 
 # Test (requires full Xcode)
 swift test
@@ -194,8 +205,10 @@ swift test
 # In Xcode
 # Build: Cmd+B
 # Test: Cmd+U
-# Run: Cmd+R
+# Run: Cmd+R (warning: runs with Xcode scheme limitations)
 ```
+
+**Important:** Always use the `create-app-bundle.sh` script to create a proper `.app` bundle. Running via `swift run` or directly from Xcode will attach the app to the terminal/IDE, causing keyboard input issues.
 
 ### App Configuration
 

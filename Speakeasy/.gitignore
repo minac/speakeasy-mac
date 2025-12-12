@@ -1,0 +1,30 @@
+# Xcode
+.DS_Store
+*.xcuserstate
+*.xcworkspace
+xcuserdata/
+DerivedData/
+
+# Swift Package Manager
+.build/
+.swiftpm/
+Packages/
+Package.resolved
+
+# Build output
+build/
+
+# App bundle (debug/release builds)
+*.app
+
+# Xcode project files
+*.pbxuser
+*.mode1v3
+*.mode2v3
+*.perspectivev3
+*.xccheckout
+*.xcscmblueprint
+
+# macOS
+.Trash
+.DS_Store
