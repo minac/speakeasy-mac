@@ -21,10 +21,12 @@ Native macOS menu bar application for reading text and URLs aloud using Apple's 
 - Plain text passthrough for non-URLs
 
 ### ⚙️ Settings Management
-- UserDefaults persistence
-- Voice selection from available system voices
-- Adjustable speech rate
-- Configurable output directory
+- Full settings window with Save/Cancel/Restore Defaults
+- Voice picker with quality labels (Default/Enhanced/Premium)
+- Speed slider (0.5x - 2.0x) with real-time preview
+- Output directory selector with native file browser
+- Unsaved changes tracking
+- UserDefaults persistence with automatic save
 - Global keyboard shortcuts (planned)
 
 ### 🎨 Menu Bar Integration
@@ -35,29 +37,39 @@ Native macOS menu bar application for reading text and URLs aloud using Apple's 
 
 ## Architecture
 
-### Current Implementation (Phases 1-2 Complete)
+### Current Implementation (Phases 1-5 Complete)
 
 **Core Components:**
+- `AppState` - Central @MainActor coordinator for all app state
 - `SpeechEngine` - AVSpeechSynthesizer wrapper with delegate callbacks
 - `TextExtractor` - URLSession + SwiftSoup for web content extraction
 - `SettingsService` - UserDefaults persistence layer
 - `VoiceDiscoveryService` - System voice enumeration
 
 **Models:**
-- `SpeechSettings` - Codable settings model
+- `SpeechSettings` - Codable settings model with UI speed conversion
 - `Voice` - Wrapper for AVSpeechSynthesisVoice
 - `PlaybackState` - Enum: idle, speaking, paused
 
+**Views:**
+- `MenuBarView` - Menu bar interface with status and controls
+- `InputWindow` - Text/URL input with Play/Stop/Clear buttons
+- `SettingsWindow` - Comprehensive settings UI
+- `VoicePicker`, `SpeedSlider`, `DirectoryPicker` - Reusable components
+
+**ViewModels:**
+- `InputViewModel` - Manages input window state and processing
+- `SettingsViewModel` - Manages settings with unsaved changes tracking
+
 **Test Coverage:**
-- SpeechEngineTests - TTS functionality
-- TextExtractorTests - URL parsing and HTML extraction
-- SettingsServiceTests - Persistence layer
+- SpeechEngineTests - TTS functionality (8 tests)
+- TextExtractorTests - URL parsing and HTML extraction (23 tests)
+- SettingsServiceTests - Persistence layer (7 tests)
+- InputViewModelTests - Input window logic (11 tests)
+- SettingsViewModelTests - Settings management (13 tests)
 
-### Planned Features (Phases 3-7)
+### Planned Features (Phases 6-7)
 
-**Phase 3:** Menu bar UI with MenuBarExtra
-**Phase 4:** Input window for text/URL entry
-**Phase 5:** Settings window for configuration
 **Phase 6:** Global keyboard shortcuts (Carbon Events)
 **Phase 7:** Polish, error handling, progress tracking
 
@@ -103,6 +115,7 @@ Speakeasy/
 ├── Speakeasy/
 │   ├── SpeakeasyApp.swift           # App entry point
 │   ├── Core/
+│   │   ├── AppState.swift           # Central coordinator
 │   │   ├── SpeechEngine.swift       # TTS engine
 │   │   └── TextExtractor.swift      # URL/HTML parsing
 │   ├── Models/
@@ -112,14 +125,28 @@ Speakeasy/
 │   ├── Services/
 │   │   ├── SettingsService.swift
 │   │   └── VoiceDiscoveryService.swift
+│   ├── Views/
+│   │   ├── MenuBarView.swift
+│   │   ├── InputWindow.swift
+│   │   ├── SettingsWindow.swift
+│   │   └── Components/
+│   │       ├── VoicePicker.swift
+│   │       ├── SpeedSlider.swift
+│   │       └── DirectoryPicker.swift
+│   ├── ViewModels/
+│   │   ├── InputViewModel.swift
+│   │   └── SettingsViewModel.swift
 │   └── Utilities/
 │       └── Extensions.swift         # String URL helpers
 └── Tests/
     ├── CoreTests/
     │   ├── SpeechEngineTests.swift
     │   └── TextExtractorTests.swift
-    └── ServicesTests/
-        └── SettingsServiceTests.swift
+    ├── ServicesTests/
+    │   └── SettingsServiceTests.swift
+    └── ViewModelTests/
+        ├── InputViewModelTests.swift
+        └── SettingsViewModelTests.swift
 ```
 
 ### Running Tests
@@ -185,10 +212,10 @@ This project follows TDD. Before submitting PRs:
 
 - [x] Phase 1: Core TTS with AVSpeechSynthesizer
 - [x] Phase 2: Text extraction from URLs
-- [ ] Phase 3: Menu bar UI
-- [ ] Phase 4: Input window
-- [ ] Phase 5: Settings window
-- [ ] Phase 6: Global keyboard shortcuts
+- [x] Phase 3: Menu bar UI with AppState coordination
+- [x] Phase 4: Input window with text/URL entry
+- [x] Phase 5: Settings window with voice/speed/directory pickers
+- [ ] Phase 6: Global keyboard shortcuts (Carbon Events)
 - [ ] Phase 7: Polish and error handling
 - [ ] Future: Audio export to WAV
 - [ ] Future: Clipboard monitoring
