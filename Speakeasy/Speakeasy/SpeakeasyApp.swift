@@ -10,13 +10,13 @@ struct SpeakeasyApp: App {
         MenuBarExtra("Speakeasy", systemImage: "speaker.wave.2") {
             MenuBarView()
                 .environmentObject(appState)
-                .onChange(of: appState.showInputWindow) { newValue in
+                .onChange(of: appState.showInputWindow) { _, newValue in
                     if newValue {
                         openWindow(id: "input")
                         appState.showInputWindow = false
                     }
                 }
-                .onChange(of: appState.showSettingsWindow) { newValue in
+                .onChange(of: appState.showSettingsWindow) { _, newValue in
                     if newValue {
                         openWindow(id: "settings")
                         appState.showSettingsWindow = false
@@ -30,8 +30,7 @@ struct SpeakeasyApp: App {
                 .environmentObject(appState)
         }
         .windowResizability(.contentSize)
-        .defaultPosition(.center)
-        .keyboardShortcut("r", modifiers: [.command])
+        .defaultPosition(.topTrailing)
 
         // Settings window
         Window("Settings", id: "settings") {
@@ -39,8 +38,7 @@ struct SpeakeasyApp: App {
                 .environmentObject(appState)
         }
         .windowResizability(.contentSize)
-        .defaultPosition(.center)
-        .keyboardShortcut(",", modifiers: [.command])
+        .defaultPosition(.topTrailing)
     }
 }
 

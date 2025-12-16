@@ -13,14 +13,12 @@ class AppState: ObservableObject {
     // Window visibility
     @Published var showInputWindow = false
     @Published var showSettingsWindow = false
-    @Published var showPermissionsAlert = false
 
     // Services
     private let speechEngine: SpeechEngine
     private let textExtractor: TextExtractor
     private let settingsService: SettingsService
     private let voiceDiscovery: VoiceDiscoveryService
-    private let shortcutManager: ShortcutManager
 
     // Available voices
     @Published var availableVoices: [Voice] = []
@@ -31,11 +29,9 @@ class AppState: ObservableObject {
         self.speechEngine = SpeechEngine()
         self.textExtractor = TextExtractor()
         self.voiceDiscovery = VoiceDiscoveryService()
-        self.shortcutManager = ShortcutManager()
 
         setupSpeechCallbacks()
         loadVoices()
-        setupGlobalShortcuts()
     }
 
     // MARK: - Voice Management
@@ -153,32 +149,4 @@ class AppState: ObservableObject {
         }
     }
 
-    // MARK: - Global Shortcuts
-
-    private func setupGlobalShortcuts() {
-        // Check for accessibility permissions
-        guard PermissionsManager.hasAccessibilityPermissions() else {
-            AppLogger.shortcuts.warning("Accessibility permissions not granted. Global shortcuts disabled.")
-            // Show alert after a brief delay to let the app finish launching
-            Task { @MainActor in
-                try? await Task.sleep(nanoseconds: 1_000_000_000) // 1 second
-                showPermissionsAlert = true
-            }
-            return
-        }
-
-        // Register the "Read Text" shortcut from settings
-        let shortcut = settings.shortcuts.readTextShortcut
-        shortcutManager.register(shortcut: shortcut) { [weak self] in
-            Task { @MainActor [weak self] in
-                self?.openInputWindow()
-            }
-        }
-    }
-
-    /// Re-registers global shortcuts (call after settings change)
-    func updateGlobalShortcuts() {
-        shortcutManager.unregisterAll()
-        setupGlobalShortcuts()
-    }
 }

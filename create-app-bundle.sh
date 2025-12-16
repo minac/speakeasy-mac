@@ -12,15 +12,15 @@ fi
 echo "Building $CONFIG configuration..."
 
 # Build the executable
-swift build -c $CONFIG
+swift build -c $CONFIG --package-path Speakeasy
 
 # Create app bundle structure
-APP_NAME="Speakeasy.app"
 if [ "$CONFIG" = "release" ]; then
-    APP_DIR="build/$APP_NAME"
+    APP_NAME="Speakeasy.app"
 else
-    APP_DIR=".build/debug/$APP_NAME"
+    APP_NAME="Speakeasy-build.app"
 fi
+APP_DIR="build/$CONFIG/$APP_NAME"
 
 CONTENTS_DIR="$APP_DIR/Contents"
 MACOS_DIR="$CONTENTS_DIR/MacOS"
@@ -33,23 +33,20 @@ mkdir -p "$RESOURCES_DIR"
 
 # Copy executable
 echo "Copying executable..."
-cp .build/$CONFIG/Speakeasy "$MACOS_DIR/"
+cp Speakeasy/.build/$CONFIG/Speakeasy "$MACOS_DIR/"
 
 # Copy Info.plist
 echo "Copying Info.plist..."
-cp Speakeasy/Resources/Info.plist "$CONTENTS_DIR/"
+cp Speakeasy/Speakeasy/Resources/Info.plist "$CONTENTS_DIR/"
 
 # Set executable permissions
 chmod +x "$MACOS_DIR/Speakeasy"
 
 echo ""
 echo "✅ App bundle created at: $APP_DIR"
+echo "Launch with: open $APP_DIR"
 if [ "$CONFIG" = "release" ]; then
     echo ""
     echo "To install:"
     echo "  cp -r $APP_DIR /Applications/"
-    echo ""
-    echo "Or drag and drop $APP_DIR to your Applications folder"
-else
-    echo "Launch with: open $APP_DIR"
 fi

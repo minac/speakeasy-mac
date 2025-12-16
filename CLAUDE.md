@@ -30,7 +30,7 @@
 - **Thread Safety**: `@MainActor` for UI thread safety, delegate callbacks use `Task(priority: .userInitiated)`
 
 #### Target Platform
-- **macOS 13.0+** (for MenuBarExtra API)
+- **macOS 14.0+** (for SwiftUI onChange API)
 - **Swift 5.9+**
 - **SwiftUI** for all UI components
 - **Swift Package Manager** for dependencies
@@ -55,69 +55,45 @@
 ### Project Structure
 
 ```
-Speakeasy/
+speakeasy-mac/
+├── create-app-bundle.sh                # Build script (run from root)
 ├── Speakeasy/
-│   ├── SpeakeasyApp.swift              # @main, MenuBarExtra
-│   ├── Core/
-│   │   ├── AppState.swift              # Central state coordinator
-│   │   ├── SpeechEngine.swift          # AVSpeechSynthesizer wrapper
-│   │   ├── TextExtractor.swift         # URLSession + SwiftSoup
-│   │   └── ShortcutManager.swift       # Global hotkeys (Phase 6)
-│   ├── Models/
-│   │   ├── SpeechSettings.swift        # Codable settings
-│   │   ├── Voice.swift                 # AVSpeechSynthesisVoice wrapper
-│   │   └── PlaybackState.swift         # idle/speaking/paused
-│   ├── Services/
-│   │   ├── SettingsService.swift       # UserDefaults persistence
-│   │   └── VoiceDiscoveryService.swift # System voice enumeration
-│   ├── Views/                          # SwiftUI views (Phase 3+)
-│   ├── ViewModels/                     # View models (Phase 4+)
-│   └── Utilities/
-│       └── Extensions.swift            # String URL helpers
-└── Tests/
-    ├── CoreTests/
-    └── ServicesTests/
+│   ├── Package.swift                   # Swift Package Manager manifest
+│   ├── Speakeasy/
+│   │   ├── SpeakeasyApp.swift          # @main, MenuBarExtra
+│   │   ├── Core/
+│   │   │   ├── AppState.swift          # Central state coordinator
+│   │   │   ├── SpeechEngine.swift      # AVSpeechSynthesizer wrapper
+│   │   │   └── TextExtractor.swift     # URLSession + SwiftSoup
+│   │   ├── Models/
+│   │   │   ├── SpeechSettings.swift    # Codable settings
+│   │   │   ├── Voice.swift             # AVSpeechSynthesisVoice wrapper
+│   │   │   └── PlaybackState.swift     # idle/speaking/paused
+│   │   ├── Services/
+│   │   │   ├── SettingsService.swift   # UserDefaults persistence
+│   │   │   └── VoiceDiscoveryService.swift # System voice enumeration
+│   │   ├── Views/
+│   │   │   ├── MenuBarView.swift       # Menu bar dropdown
+│   │   │   ├── InputWindow.swift       # Text/URL input window
+│   │   │   ├── SettingsWindow.swift    # Settings window
+│   │   │   └── Components/
+│   │   │       ├── VoicePicker.swift
+│   │   │       ├── SpeedSlider.swift
+│   │   │       └── HighlightedTextView.swift
+│   │   ├── ViewModels/
+│   │   │   ├── InputViewModel.swift
+│   │   │   └── SettingsViewModel.swift
+│   │   ├── Utilities/
+│   │   │   ├── Extensions.swift
+│   │   │   └── Logger.swift
+│   │   └── Resources/
+│   │       └── Info.plist
+│   └── Tests/
+│       ├── CoreTests/
+│       ├── ServicesTests/
+│       └── ViewModelTests/
+└── build/                              # Output directory (gitignored)
 ```
-
-### Implementation Phases
-
-**✅ Phase 1: Core TTS** (Complete)
-- SpeechEngine with AVSpeechSynthesizer
-- SettingsService with UserDefaults
-- VoiceDiscoveryService
-- Comprehensive test coverage
-
-**✅ Phase 2: Text Extraction** (Complete)
-- TextExtractor with URLSession + SwiftSoup
-- URL validation and normalization
-- HTML parsing and cleaning
-- Test coverage for all extraction logic
-
-**⏳ Phase 3: Menu Bar UI** (Next)
-- MenuBarExtra implementation
-- AppState central coordinator
-- Menu items: Read Text, Settings, Quit
-
-**📋 Phase 4: Input Window**
-- SwiftUI window for text/URL input
-- InputViewModel
-- Play/Stop controls
-
-**📋 Phase 5: Settings Window**
-- Voice picker
-- Speed slider
-- Output directory selector
-
-**📋 Phase 6: Global Shortcuts**
-- Carbon Events API (or MASShortcut library)
-- Accessibility permissions handling
-- Cmd+Shift+P default for "Read Text"
-
-**📋 Phase 7: Polish**
-- Error handling UI
-- Progress tracking
-- Loading states
-- Edge case handling
 
 ### Testing Strategy
 
@@ -125,7 +101,6 @@ Speakeasy/
 - **Integration tests**: Cross-component functionality
 - **Network tests**: Real URL fetching (may be slow)
 - **QoS handling**: All async tasks use `.userInitiated` priority to avoid inversions
-- **Target**: 80%+ coverage
 
 ### Key Technical Patterns
 
@@ -179,14 +154,14 @@ SpeechSettings.rateToUISpeed(_ rate: Float) -> Float
 ### Dependencies
 
 - **SwiftSoup** (2.6.0+): HTML parsing
-- **No Piper TTS**: Using native AVSpeechSynthesizer instead
-- **Optional MASShortcut**: For easier global shortcuts (Phase 6)
 
 ### Build & Test Commands
 
+All commands run from project root:
+
 ```bash
 # Build executable only
-swift build
+swift build --package-path Speakeasy
 
 # Build and create .app bundle (debug)
 ./create-app-bundle.sh
@@ -196,11 +171,11 @@ swift build
 # Build and create .app bundle (release)
 ./create-app-bundle.sh release
 
-# Install to Applications
-cp -r build/Speakeasy.app /Applications/
+# Install to Applications (release only)
+cp -r build/release/Speakeasy.app /Applications/
 
 # Test (requires full Xcode)
-swift test
+swift test --package-path Speakeasy
 
 # In Xcode
 # Build: Cmd+B
@@ -210,46 +185,11 @@ swift test
 
 **Important:** Always use the `create-app-bundle.sh` script to create a proper `.app` bundle. Running via `swift run` or directly from Xcode will attach the app to the terminal/IDE, causing keyboard input issues.
 
+**Note:** Debug builds create `Speakeasy-build.app` to distinguish from release builds.
+
 ### App Configuration
 
 **Info.plist:**
 - `LSUIElement = true` (hide from dock)
 - `LSApplicationCategoryType = public.app-category.utilities`
-- `NSAppleEventsUsageDescription` for accessibility permissions
-
-**No App Sandbox**: Required for global shortcuts with accessibility permissions
-
-### Differences from Python Version
-
-| Feature | Python | Swift |
-|---------|--------|-------|
-| TTS | Piper (ONNX) | AVSpeechSynthesizer |
-| UI | tkinter | SwiftUI |
-| HTTP | requests | URLSession |
-| HTML | BeautifulSoup | SwiftSoup |
-| Settings | JSON file | UserDefaults + Codable |
-| Threading | Queue-based | async/await |
-| Shortcuts | pynput (broken) | Carbon Events |
-
-### Known Issues & Solutions
-
-**QoS Priority Inversions:**
-- Use `Task(priority: .userInitiated)` in delegate callbacks
-- Avoids test warnings about thread priorities
-
-**XCTest with async/await:**
-- Use do-catch instead of `XCTAssertThrowsError` for async functions
-- Pattern: `do { try await ...; XCTFail() } catch { assert... }`
-
-**Large Files:**
-- No voice models needed (using native TTS)
-- `.gitignore` excludes voices/, screenshots/, build artifacts
-
-### Future Enhancements
-
-- WAV audio export using AVSpeechSynthesizer.write()
-- Clipboard monitoring for auto-reading
-- Voice customization (pitch, volume, AVSpeechUtterance properties)
-- Multiple language support
-- Keyboard navigation in UI
-- VoiceOver accessibility support
+- `LSMinimumSystemVersion = 14.0`

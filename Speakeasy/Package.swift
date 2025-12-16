@@ -4,7 +4,7 @@ import PackageDescription
 let package = Package(
     name: "Speakeasy",
     platforms: [
-        .macOS(.v13)
+        .macOS(.v14)
     ],
     products: [
         .executable(
@@ -19,7 +19,8 @@ let package = Package(
         .executableTarget(
             name: "Speakeasy",
             dependencies: ["SwiftSoup"],
-            path: "Speakeasy"
+            path: "Speakeasy",
+            exclude: ["Resources/Info.plist"]
         ),
         .testTarget(
             name: "SpeakeasyTests",

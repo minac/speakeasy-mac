@@ -107,32 +107,28 @@ struct InputWindow: View {
 
                 Spacer()
 
-                // Stop button (when playing)
-                if appState.playbackState != .idle {
-                    Button {
-                        viewModel.stop()
-                    } label: {
-                        Label("Stop", systemImage: "stop.fill")
-                    }
-                    .keyboardShortcut(".", modifiers: [.command])
-                }
-
                 // Close button
                 Button("Close") {
                     dismiss()
                 }
                 .keyboardShortcut(.cancelAction)
 
-                // Play button
+                // Play/Stop toggle button
                 Button {
-                    Task {
-                        await viewModel.play()
+                    if isPlaybackActive {
+                        viewModel.stop()
+                    } else {
+                        Task {
+                            await viewModel.play()
+                        }
                     }
                 } label: {
                     if viewModel.isProcessing {
                         ProgressView()
                             .scaleEffect(0.8)
                             .frame(width: 16, height: 16)
+                    } else if isPlaybackActive {
+                        Label("Stop", systemImage: "stop.fill")
                     } else {
                         Label("Play", systemImage: "play.fill")
                     }
@@ -143,14 +139,20 @@ struct InputWindow: View {
             }
         }
         .padding()
-        .frame(width: 600, height: 300)
+        .frame(width: 600, height: 360)
         .onAppear {
             // Activate the app and bring window to front
             NSApp.activate(ignoringOtherApps: true)
 
-            // Ensure the window comes to the very front
+            // Position window at top right of screen
             DispatchQueue.main.async {
-                if let window = NSApp.windows.first(where: { $0.title == "Read Text" }) {
+                if let window = NSApp.windows.first(where: { $0.title == "Read Text" }),
+                   let screen = NSScreen.main {
+                    let screenFrame = screen.visibleFrame
+                    let windowFrame = window.frame
+                    let x = screenFrame.maxX - windowFrame.width - 20
+                    let y = screenFrame.maxY - windowFrame.height - 20
+                    window.setFrameOrigin(NSPoint(x: x, y: y))
                     window.makeKeyAndOrderFront(nil)
                     window.orderFrontRegardless()
                 }

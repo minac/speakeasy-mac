@@ -25,7 +25,6 @@ final class SettingsServiceTests: XCTestCase {
         // Then
         XCTAssertEqual(settings.selectedVoiceIdentifier, "com.apple.voice.compact.en-US.Samantha")
         XCTAssertEqual(settings.speechRate, 0.5)
-        XCTAssertEqual(settings.shortcuts.readTextShortcut, "cmd+shift+p")
     }
 
     func testSaveAndLoadSettings() {
@@ -33,7 +32,6 @@ final class SettingsServiceTests: XCTestCase {
         var settings = SpeechSettings.default
         settings.selectedVoiceIdentifier = "com.apple.voice.compact.en-US.Alex"
         settings.speechRate = 0.8
-        settings.shortcuts.readTextShortcut = "cmd+shift+r"
 
         // When
         service.saveSettings(settings)
@@ -42,7 +40,6 @@ final class SettingsServiceTests: XCTestCase {
         // Then
         XCTAssertEqual(loadedSettings.selectedVoiceIdentifier, "com.apple.voice.compact.en-US.Alex")
         XCTAssertEqual(loadedSettings.speechRate, 0.8)
-        XCTAssertEqual(loadedSettings.shortcuts.readTextShortcut, "cmd+shift+r")
     }
 
     func testSaveSettingsPersistsToUserDefaults() {
@@ -73,20 +70,6 @@ final class SettingsServiceTests: XCTestCase {
         // Then - should return default settings
         XCTAssertEqual(settings.selectedVoiceIdentifier, SpeechSettings.default.selectedVoiceIdentifier)
         XCTAssertEqual(settings.speechRate, SpeechSettings.default.speechRate)
-    }
-
-    func testOutputDirectoryPersistence() {
-        // Given
-        var settings = SpeechSettings.default
-        let customDirectory = FileManager.default.urls(for: .desktopDirectory, in: .userDomainMask)[0]
-        settings.outputDirectory = customDirectory
-
-        // When
-        service.saveSettings(settings)
-        let loadedSettings = service.loadSettings()
-
-        // Then
-        XCTAssertEqual(loadedSettings.outputDirectory, customDirectory)
     }
 
     func testSpeedConversionRoundTrip() {

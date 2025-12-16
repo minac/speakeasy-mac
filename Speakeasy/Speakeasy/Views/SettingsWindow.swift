@@ -35,10 +35,6 @@ struct SettingsWindow: View {
                     SpeedSlider(speed: $viewModel.uiSpeed)
                 }
 
-                Section("Output") {
-                    DirectoryPicker(directory: $viewModel.outputDirectory)
-                }
-
                 if viewModel.hasUnsavedChanges {
                     Section {
                         HStack {
@@ -81,10 +77,22 @@ struct SettingsWindow: View {
             }
             .padding()
         }
-        .frame(width: 500, height: 450)
+        .frame(width: 500, height: 350)
         .onAppear {
-            // Activate the window so it can receive keyboard input
+            // Activate the app and position window at top right
             NSApp.activate(ignoringOtherApps: true)
+
+            DispatchQueue.main.async {
+                if let window = NSApp.windows.first(where: { $0.title == "Settings" }),
+                   let screen = NSScreen.main {
+                    let screenFrame = screen.visibleFrame
+                    let windowFrame = window.frame
+                    let x = screenFrame.maxX - windowFrame.width - 20
+                    let y = screenFrame.maxY - windowFrame.height - 20
+                    window.setFrameOrigin(NSPoint(x: x, y: y))
+                    window.makeKeyAndOrderFront(nil)
+                }
+            }
         }
     }
 
@@ -92,13 +100,11 @@ struct SettingsWindow: View {
 
     private var canRestoreDefaults: Bool {
         viewModel.selectedVoiceIdentifier != SpeechSettings.default.selectedVoiceIdentifier ||
-        viewModel.uiSpeed != SpeechSettings.default.uiSpeed ||
-        viewModel.outputDirectory != SpeechSettings.default.outputDirectory
+        viewModel.uiSpeed != SpeechSettings.default.uiSpeed
     }
 
     private func restoreDefaults() {
         viewModel.selectedVoiceIdentifier = SpeechSettings.default.selectedVoiceIdentifier
         viewModel.uiSpeed = SpeechSettings.default.uiSpeed
-        viewModel.outputDirectory = SpeechSettings.default.outputDirectory
     }
 }

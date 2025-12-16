@@ -20,10 +20,6 @@ class SettingsViewModel: ObservableObject {
         }
     }
 
-    @Published var outputDirectory: URL {
-        didSet { checkForChanges() }
-    }
-
     @Published private(set) var hasUnsavedChanges: Bool = false
 
     let availableVoices: [Voice]
@@ -39,7 +35,6 @@ class SettingsViewModel: ObservableObject {
         // Initialize from current settings
         self.selectedVoiceIdentifier = appState.settings.selectedVoiceIdentifier
         self._uiSpeed = appState.settings.uiSpeed
-        self.outputDirectory = appState.settings.outputDirectory
 
         // Load available voices
         self.availableVoices = voiceService.discoverVoices()
@@ -50,11 +45,9 @@ class SettingsViewModel: ObservableObject {
         var newSettings = appState.settings
         newSettings.selectedVoiceIdentifier = selectedVoiceIdentifier
         newSettings.setUISpeed(uiSpeed)
-        newSettings.outputDirectory = outputDirectory
 
         appState.settings = newSettings
         appState.saveSettings()
-        appState.updateGlobalShortcuts() // Re-register shortcuts with new settings
 
         // Update original settings to reflect saved state
         originalSettings = newSettings
@@ -65,7 +58,6 @@ class SettingsViewModel: ObservableObject {
     func cancel() {
         selectedVoiceIdentifier = originalSettings.selectedVoiceIdentifier
         uiSpeed = originalSettings.uiSpeed
-        outputDirectory = originalSettings.outputDirectory
         hasUnsavedChanges = false
     }
 
@@ -84,8 +76,7 @@ class SettingsViewModel: ObservableObject {
     private func checkForChanges() {
         hasUnsavedChanges = (
             selectedVoiceIdentifier != originalSettings.selectedVoiceIdentifier ||
-            uiSpeed != originalSettings.uiSpeed ||
-            outputDirectory != originalSettings.outputDirectory
+            uiSpeed != originalSettings.uiSpeed
         )
     }
 }

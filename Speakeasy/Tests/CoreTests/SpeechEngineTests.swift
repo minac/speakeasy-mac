@@ -95,9 +95,9 @@ final class SpeechEngineTests: XCTestCase {
         var progressCalled = false
         let expectation = XCTestExpectation(description: "Progress callback called")
 
-        engine.onProgress = { progress, total in
+        engine.onProgress = { progress, wordRange in
             progressCalled = true
-            XCTAssertGreaterThan(total, 0)
+            XCTAssertNotEqual(wordRange.location, NSNotFound)
             XCTAssertGreaterThanOrEqual(progress, 0.0)
             XCTAssertLessThanOrEqual(progress, 1.0)
             expectation.fulfill()
