@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Speakeasy - Text-to-Speech for macOS</title>
+    <meta name="description" content="Native macOS menu bar app for reading text and URLs aloud using Apple's text-to-speech.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #0a0a0a;
+            --bg-secondary: #141414;
+            --bg-card: #1a1a1a;
+            --text-primary: #ffffff;
+            --text-secondary: #a1a1a1;
+            --accent: #3b82f6;
+            --accent-hover: #2563eb;
+            --border: #2a2a2a;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+
+        /* Header */
+        header {
+            padding: 20px 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        header .container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            text-decoration: none;
+        }
+
+        .github-link {
+            color: var(--text-secondary);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.9rem;
+            transition: color 0.2s;
+        }
+
+        .github-link:hover {
+            color: var(--text-primary);
+        }
+
+        .github-link svg {
+            width: 20px;
+            height: 20px;
+            fill: currentColor;
+        }
+
+        /* Hero */
+        .hero {
+            padding: 80px 0 60px;
+            text-align: center;
+        }
+
+        .hero h1 {
+            font-size: 3rem;
+            font-weight: 700;
+            margin-bottom: 16px;
+            letter-spacing: -0.02em;
+        }
+
+        .hero .tagline {
+            font-size: 1.25rem;
+            color: var(--text-secondary);
+            max-width: 600px;
+            margin: 0 auto 32px;
+        }
+
+        .cta-buttons {
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 14px 28px;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 500;
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--accent-hover);
+        }
+
+        .btn-secondary {
+            background: var(--bg-card);
+            color: var(--text-primary);
+            border: 1px solid var(--border);
+        }
+
+        .btn-secondary:hover {
+            background: var(--bg-secondary);
+            border-color: #3a3a3a;
+        }
+
+        /* Hero Screenshot */
+        .hero-screenshot {
+            margin-top: 60px;
+            position: relative;
+        }
+
+        .hero-screenshot img {
+            max-width: 100%;
+            border-radius: 12px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            border: 1px solid var(--border);
+        }
+
+        /* Features */
+        .features {
+            padding: 80px 0;
+        }
+
+        .features h2 {
+            text-align: center;
+            font-size: 2rem;
+            margin-bottom: 48px;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 24px;
+        }
+
+        .feature-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 28px;
+        }
+
+        .feature-icon {
+            font-size: 2rem;
+            margin-bottom: 16px;
+        }
+
+        .feature-card h3 {
+            font-size: 1.125rem;
+            margin-bottom: 8px;
+        }
+
+        .feature-card p {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+        }
+
+        /* Screenshots Section */
+        .screenshots {
+            padding: 80px 0;
+            background: var(--bg-secondary);
+        }
+
+        .screenshots h2 {
+            text-align: center;
+            font-size: 2rem;
+            margin-bottom: 48px;
+        }
+
+        .screenshot-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 24px;
+        }
+
+        .screenshot-item {
+            text-align: center;
+        }
+
+        .screenshot-item img {
+            max-width: 100%;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            margin-bottom: 12px;
+        }
+
+        .screenshot-item p {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        /* Installation */
+        .installation {
+            padding: 80px 0;
+        }
+
+        .installation h2 {
+            text-align: center;
+            font-size: 2rem;
+            margin-bottom: 16px;
+        }
+
+        .installation .subtitle {
+            text-align: center;
+            color: var(--text-secondary);
+            margin-bottom: 48px;
+        }
+
+        .install-options {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 32px;
+        }
+
+        .install-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 32px;
+        }
+
+        .install-card h3 {
+            font-size: 1.25rem;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .install-card ol {
+            padding-left: 20px;
+            color: var(--text-secondary);
+        }
+
+        .install-card li {
+            margin-bottom: 12px;
+        }
+
+        .install-card code {
+            background: var(--bg-primary);
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            color: var(--accent);
+        }
+
+        pre {
+            background: var(--bg-primary);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 16px;
+            overflow-x: auto;
+            margin-top: 16px;
+        }
+
+        pre code {
+            background: none;
+            padding: 0;
+            color: var(--text-secondary);
+        }
+
+        .note {
+            background: rgba(59, 130, 246, 0.1);
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            border-radius: 8px;
+            padding: 16px;
+            margin-top: 24px;
+            font-size: 0.9rem;
+        }
+
+        .note strong {
+            color: var(--accent);
+        }
+
+        /* Requirements */
+        .requirements {
+            padding: 60px 0;
+            background: var(--bg-secondary);
+        }
+
+        .requirements h2 {
+            text-align: center;
+            font-size: 1.5rem;
+            margin-bottom: 32px;
+        }
+
+        .req-list {
+            display: flex;
+            justify-content: center;
+            gap: 48px;
+            flex-wrap: wrap;
+        }
+
+        .req-item {
+            text-align: center;
+        }
+
+        .req-item .version {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .req-item .label {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        /* Footer */
+        footer {
+            padding: 40px 0;
+            border-top: 1px solid var(--border);
+            text-align: center;
+        }
+
+        footer p {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        footer a {
+            color: var(--accent);
+            text-decoration: none;
+        }
+
+        footer a:hover {
+            text-decoration: underline;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 2rem;
+            }
+
+            .hero .tagline {
+                font-size: 1.1rem;
+            }
+
+            .install-options {
+                grid-template-columns: 1fr;
+            }
+
+            .features-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <a href="/" class="logo">Speakeasy</a>
+            <a href="https://github.com/minac/speakeasy-mac" class="github-link">
+                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/>
+                </svg>
+                View on GitHub
+            </a>
+        </div>
+    </header>
+
+    <section class="hero">
+        <div class="container">
+            <h1>Text-to-Speech for macOS</h1>
+            <p class="tagline">A native menu bar app that reads text and web articles aloud using Apple's high-quality voices.</p>
+            <div class="cta-buttons">
+                <a href="https://github.com/minac/speakeasy-mac/releases/latest" class="btn btn-primary">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/>
+                    </svg>
+                    Download
+                </a>
+                <a href="https://github.com/minac/speakeasy-mac" class="btn btn-secondary">
+                    View Source
+                </a>
+            </div>
+            <div class="hero-screenshot">
+                <img src="screenshots/read-window-while-reading.png" alt="Speakeasy reading text with word highlighting">
+            </div>
+        </div>
+    </section>
+
+    <section class="features">
+        <div class="container">
+            <h2>Features</h2>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">🎙️</div>
+                    <h3>Native Text-to-Speech</h3>
+                    <p>Uses Apple's AVSpeechSynthesizer for high-quality, natural-sounding voices that improve with each macOS update.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🔗</div>
+                    <h3>URL Content Extraction</h3>
+                    <p>Paste any URL and Speakeasy extracts the article content, stripping away navigation, ads, and clutter.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">✨</div>
+                    <h3>Word Highlighting</h3>
+                    <p>Follow along with real-time word highlighting as the text is read aloud.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">⚡</div>
+                    <h3>Menu Bar App</h3>
+                    <p>Lives in your menu bar for quick access. No dock icon, no clutter—just one click away.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🎚️</div>
+                    <h3>Customizable</h3>
+                    <p>Choose from all available macOS voices and adjust playback speed from 0.5x to 2x.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🍎</div>
+                    <h3>100% Native</h3>
+                    <p>Built with SwiftUI. No Electron, no web views—just a fast, lightweight native app.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="screenshots">
+        <div class="container">
+            <h2>Screenshots</h2>
+            <div class="screenshot-grid">
+                <div class="screenshot-item">
+                    <img src="screenshots/tray-menu.png" alt="Menu bar dropdown">
+                    <p>Menu bar interface</p>
+                </div>
+                <div class="screenshot-item">
+                    <img src="screenshots/read-window-with-text.png" alt="Text input window">
+                    <p>Text or URL input</p>
+                </div>
+                <div class="screenshot-item">
+                    <img src="screenshots/settings.png" alt="Settings window">
+                    <p>Voice and speed settings</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="installation">
+        <div class="container">
+            <h2>Installation</h2>
+            <p class="subtitle">Choose the option that works best for you</p>
+            <div class="install-options">
+                <div class="install-card">
+                    <h3>
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/>
+                        </svg>
+                        Download Release
+                    </h3>
+                    <ol>
+                        <li>Download the latest <code>.app</code> from <a href="https://github.com/minac/speakeasy-mac/releases/latest">Releases</a></li>
+                        <li>Drag <code>Speakeasy.app</code> to Applications</li>
+                        <li><strong>First launch:</strong> Right-click → Open</li>
+                        <li>Launch normally from Spotlight</li>
+                    </ol>
+                </div>
+                <div class="install-card">
+                    <h3>
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="16 18 22 12 16 6"></polyline>
+                            <polyline points="8 6 2 12 8 18"></polyline>
+                        </svg>
+                        Build from Source
+                    </h3>
+                    <ol>
+                        <li>Clone the repository</li>
+                        <li>Run the build script</li>
+                        <li>Copy to Applications</li>
+                    </ol>
+                    <pre><code>git clone https://github.com/minac/speakeasy-mac.git
+cd speakeasy-mac
+./create-app-bundle.sh release
+cp -r build/release/Speakeasy.app /Applications/</code></pre>
+                </div>
+            </div>
+            <div class="note">
+                <strong>Note:</strong> This app is not code-signed. On first launch, macOS will show a security warning. Right-click the app and select "Open" to bypass Gatekeeper. You only need to do this once.
+            </div>
+        </div>
+    </section>
+
+    <section class="requirements">
+        <div class="container">
+            <h2>Requirements</h2>
+            <div class="req-list">
+                <div class="req-item">
+                    <div class="version">macOS 14+</div>
+                    <div class="label">Sonoma or later</div>
+                </div>
+                <div class="req-item">
+                    <div class="version">Swift 5.9+</div>
+                    <div class="label">For building</div>
+                </div>
+                <div class="req-item">
+                    <div class="version">Xcode 15+</div>
+                    <div class="label">For development</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="container">
+            <p>
+                MIT License · Built with <a href="https://github.com/anthropics/claude-code">Claude Code</a> ·
+                <a href="https://github.com/minac/speakeasy-mac">View on GitHub</a>
+            </p>
+        </div>
+    </footer>
+</body>
+</html>
