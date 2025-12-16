@@ -37,7 +37,7 @@ struct SettingsWindow: View {
                             get: { viewModel.showOnlyHighQualityVoices },
                             set: { newValue in
                                 viewModel.showOnlyHighQualityVoices = newValue
-                                if newValue, let firstVoice = viewModel.availableVoices.first {
+                                if let firstVoice = viewModel.availableVoices.first {
                                     viewModel.selectedVoiceIdentifier = firstVoice.id
                                 }
                             }
@@ -85,7 +85,7 @@ struct SettingsWindow: View {
             }
             .padding()
         }
-        .frame(width: 500, height: 280)
+        .frame(width: 500, height: 320)
         .onAppear {
             // Activate the app and position window at top right
             NSApp.activate(ignoringOtherApps: true)
