@@ -2,6 +2,8 @@
 
 Native macOS menu bar application for reading text and URLs aloud using Apple's native text-to-speech.
 
+![Speakeasy reading text with word highlighting](screenshots/swift-version/read-window-while-reading.png)
+
 ## Features
 
 - Native macOS text-to-speech using AVSpeechSynthesizer
@@ -19,18 +21,21 @@ Native macOS menu bar application for reading text and URLs aloud using Apple's 
 
 ## Installation
 
+> **Note:** This app is not code-signed (no Apple Developer ID). On first launch, macOS Gatekeeper will show a security warning. To bypass: **right-click the app → Open**. You only need to do this once.
+
 ### Option 1: Download Release Build
 
 1. Download the latest release from the Releases page
 2. Drag `Speakeasy.app` to your Applications folder
-3. Launch from Applications or Spotlight
+3. **First launch:** Right-click → Open (to bypass Gatekeeper)
+4. Launch normally from Applications or Spotlight
 
 ### Option 2: Build from Source
 
 ```bash
 # Clone the repository
 git clone https://github.com/minac/speakeasy-mac.git
-cd speakeasy-mac/Speakeasy
+cd speakeasy-mac
 
 # Build and create app bundle
 ./create-app-bundle.sh release
@@ -43,26 +48,28 @@ cp -r build/release/Speakeasy.app /Applications/
 
 1. Click the speaker icon in the menu bar
 2. Select "Read Text..."
+
+![Menu bar dropdown](screenshots/swift-version/tray-menu.png)
+
 3. Enter text or paste a URL
 4. Click "Play" (becomes "Stop" during playback)
+
+![Text input window](screenshots/swift-version/read-window-with-text.png)
 
 ### Settings
 
 - **Voice**: Choose from available macOS system voices
 - **Speed**: Adjust playback speed (0.5x - 2.0x)
 
+![Settings window](screenshots/swift-version/settings.png)
+
 ### Getting Better Voices
 
-For more natural-sounding voices:
+For more natural-sounding free voices for macOS:
 
 1. Open **System Settings > Accessibility > Spoken Content**
 2. Click **System Voice > Manage Voices...**
 3. Download **Enhanced** or **Premium** versions
-
-Recommended voices:
-- **Samantha (Enhanced)** - US English, female
-- **Alex (Enhanced)** - US English, male
-- **Daniel (Enhanced)** - UK English, male
 
 ## Development
 
@@ -72,16 +79,12 @@ Recommended voices:
 # Debug build (for development)
 ./create-app-bundle.sh debug
 open build/debug/Speakeasy-build.app
-
-# Release build (optimized)
-./create-app-bundle.sh release
-open build/release/Speakeasy.app
 ```
 
 ### Running Tests
 
 ```bash
-swift test
+swift test --package-path Speakeasy
 ```
 
 Or in Xcode: **Cmd+U**
@@ -121,24 +124,6 @@ Speakeasy/
     ├── ServicesTests/
     └── ViewModelTests/
 ```
-
-## Architecture
-
-### TTS Engine
-
-Uses Apple's native `AVSpeechSynthesizer` for high-quality text-to-speech without external dependencies.
-
-### Text Extraction
-
-- **URLSession** for HTTP requests (30s timeout)
-- **SwiftSoup** for HTML parsing
-- Automatic content cleaning (removes scripts, styles, navigation)
-
-### State Management
-
-- **AppState**: Central `@MainActor ObservableObject` for app-wide state
-- **Swift Concurrency**: async/await throughout
-- **UserDefaults**: Settings persistence with Codable
 
 ## Dependencies
 
@@ -180,6 +165,4 @@ MIT
 
 ## Acknowledgments
 
-- Built with Swift and SwiftUI
-- Uses AVSpeechSynthesizer for TTS
-- HTML parsing by SwiftSoup
+- Built with Claude Code

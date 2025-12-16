@@ -55,43 +55,44 @@
 ### Project Structure
 
 ```
-Speakeasy/
+speakeasy-mac/
+├── create-app-bundle.sh                # Build script (run from root)
 ├── Speakeasy/
-│   ├── SpeakeasyApp.swift              # @main, MenuBarExtra
-│   ├── Core/
-│   │   ├── AppState.swift              # Central state coordinator
-│   │   ├── SpeechEngine.swift          # AVSpeechSynthesizer wrapper
-│   │   └── TextExtractor.swift         # URLSession + SwiftSoup
-│   ├── Models/
-│   │   ├── SpeechSettings.swift        # Codable settings
-│   │   ├── Voice.swift                 # AVSpeechSynthesisVoice wrapper
-│   │   └── PlaybackState.swift         # idle/speaking/paused
-│   ├── Services/
-│   │   ├── SettingsService.swift       # UserDefaults persistence
-│   │   └── VoiceDiscoveryService.swift # System voice enumeration
-│   ├── Views/
-│   │   ├── MenuBarView.swift           # Menu bar dropdown
-│   │   ├── InputWindow.swift           # Text/URL input window
-│   │   ├── SettingsWindow.swift        # Settings window
-│   │   └── Components/
-│   │       ├── VoicePicker.swift       # Voice selection dropdown
-│   │       ├── SpeedSlider.swift       # Speed adjustment slider
-│   │       └── HighlightedTextView.swift # Word highlighting during playback
-│   ├── ViewModels/
-│   │   ├── InputViewModel.swift        # Input window logic
-│   │   └── SettingsViewModel.swift     # Settings management
-│   └── Utilities/
-│       ├── Extensions.swift            # String URL helpers
-│       └── Logger.swift                # Structured logging
-└── Tests/
-    ├── CoreTests/
-    │   ├── SpeechEngineTests.swift
-    │   └── TextExtractorTests.swift
-    ├── ServicesTests/
-    │   └── SettingsServiceTests.swift
-    └── ViewModelTests/
-        ├── InputViewModelTests.swift
-        └── SettingsViewModelTests.swift
+│   ├── Package.swift                   # Swift Package Manager manifest
+│   ├── Speakeasy/
+│   │   ├── SpeakeasyApp.swift          # @main, MenuBarExtra
+│   │   ├── Core/
+│   │   │   ├── AppState.swift          # Central state coordinator
+│   │   │   ├── SpeechEngine.swift      # AVSpeechSynthesizer wrapper
+│   │   │   └── TextExtractor.swift     # URLSession + SwiftSoup
+│   │   ├── Models/
+│   │   │   ├── SpeechSettings.swift    # Codable settings
+│   │   │   ├── Voice.swift             # AVSpeechSynthesisVoice wrapper
+│   │   │   └── PlaybackState.swift     # idle/speaking/paused
+│   │   ├── Services/
+│   │   │   ├── SettingsService.swift   # UserDefaults persistence
+│   │   │   └── VoiceDiscoveryService.swift # System voice enumeration
+│   │   ├── Views/
+│   │   │   ├── MenuBarView.swift       # Menu bar dropdown
+│   │   │   ├── InputWindow.swift       # Text/URL input window
+│   │   │   ├── SettingsWindow.swift    # Settings window
+│   │   │   └── Components/
+│   │   │       ├── VoicePicker.swift
+│   │   │       ├── SpeedSlider.swift
+│   │   │       └── HighlightedTextView.swift
+│   │   ├── ViewModels/
+│   │   │   ├── InputViewModel.swift
+│   │   │   └── SettingsViewModel.swift
+│   │   ├── Utilities/
+│   │   │   ├── Extensions.swift
+│   │   │   └── Logger.swift
+│   │   └── Resources/
+│   │       └── Info.plist
+│   └── Tests/
+│       ├── CoreTests/
+│       ├── ServicesTests/
+│       └── ViewModelTests/
+└── build/                              # Output directory (gitignored)
 ```
 
 ### Testing Strategy
@@ -100,8 +101,6 @@ Speakeasy/
 - **Integration tests**: Cross-component functionality
 - **Network tests**: Real URL fetching (may be slow)
 - **QoS handling**: All async tasks use `.userInitiated` priority to avoid inversions
-- **Target**: 80%+ coverage
-- **Current**: 58 tests passing
 
 ### Key Technical Patterns
 
@@ -158,9 +157,11 @@ SpeechSettings.rateToUISpeed(_ rate: Float) -> Float
 
 ### Build & Test Commands
 
+All commands run from project root:
+
 ```bash
 # Build executable only
-swift build
+swift build --package-path Speakeasy
 
 # Build and create .app bundle (debug)
 ./create-app-bundle.sh
@@ -174,7 +175,7 @@ swift build
 cp -r build/release/Speakeasy.app /Applications/
 
 # Test (requires full Xcode)
-swift test
+swift test --package-path Speakeasy
 
 # In Xcode
 # Build: Cmd+B
@@ -192,38 +193,3 @@ swift test
 - `LSUIElement = true` (hide from dock)
 - `LSApplicationCategoryType = public.app-category.utilities`
 - `LSMinimumSystemVersion = 14.0`
-
-### Differences from Python Version
-
-| Feature | Python | Swift |
-|---------|--------|-------|
-| TTS | Piper (ONNX) | AVSpeechSynthesizer |
-| UI | tkinter | SwiftUI |
-| HTTP | requests | URLSession |
-| HTML | BeautifulSoup | SwiftSoup |
-| Settings | JSON file | UserDefaults + Codable |
-| Threading | Queue-based | async/await |
-
-### Known Issues & Solutions
-
-**QoS Priority Inversions:**
-- Use `Task(priority: .userInitiated)` in delegate callbacks
-- Avoids test warnings about thread priorities
-
-**XCTest with async/await:**
-- Use do-catch instead of `XCTAssertThrowsError` for async functions
-- Pattern: `do { try await ...; XCTFail() } catch { assert... }`
-
-**Large Files:**
-- No voice models needed (using native TTS)
-- `.gitignore` excludes voices/, screenshots/, build artifacts
-
-### Future Enhancements
-
-- WAV audio export using AVSpeechSynthesizer.write()
-- Clipboard monitoring for auto-reading
-- Voice customization (pitch, volume, AVSpeechUtterance properties)
-- Multiple language support
-- Keyboard navigation in UI
-- VoiceOver accessibility support
-- Global keyboard shortcuts (requires accessibility permissions)

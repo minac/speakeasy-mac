@@ -30,7 +30,7 @@ A macOS menu bar app for text-to-speech, supporting both plain text and URL cont
 ```bash
 # Clone the repository
 git clone <your-repo-url>
-cd speakeasy-mac/Speakeasy
+cd speakeasy-mac
 
 # Build and create app bundle
 ./create-app-bundle.sh release
@@ -56,7 +56,7 @@ open build/release/Speakeasy.app
 ### Running Tests
 
 ```bash
-swift test
+swift test --package-path Speakeasy
 ```
 
 Or in Xcode: **Cmd+U**
