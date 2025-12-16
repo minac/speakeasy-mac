@@ -25,6 +25,8 @@ struct SettingsWindow: View {
             // Settings form
             Form {
                 Section("Voice") {
+                    Toggle("Show only enhanced/premium voices", isOn: $viewModel.showOnlyHighQualityVoices)
+
                     VoicePicker(
                         voices: viewModel.availableVoices,
                         selectedVoiceIdentifier: $viewModel.selectedVoiceIdentifier
@@ -100,11 +102,13 @@ struct SettingsWindow: View {
 
     private var canRestoreDefaults: Bool {
         viewModel.selectedVoiceIdentifier != SpeechSettings.default.selectedVoiceIdentifier ||
-        viewModel.uiSpeed != SpeechSettings.default.uiSpeed
+        viewModel.uiSpeed != SpeechSettings.default.uiSpeed ||
+        viewModel.showOnlyHighQualityVoices != SpeechSettings.default.showOnlyHighQualityVoices
     }
 
     private func restoreDefaults() {
         viewModel.selectedVoiceIdentifier = SpeechSettings.default.selectedVoiceIdentifier
         viewModel.uiSpeed = SpeechSettings.default.uiSpeed
+        viewModel.showOnlyHighQualityVoices = SpeechSettings.default.showOnlyHighQualityVoices
     }
 }

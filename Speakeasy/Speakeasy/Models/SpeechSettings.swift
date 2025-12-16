@@ -3,10 +3,12 @@ import Foundation
 struct SpeechSettings: Codable {
     var selectedVoiceIdentifier: String
     var speechRate: Float  // 0.0 (slow) to 1.0 (fast) - AVSpeechSynthesizer range
+    var showOnlyHighQualityVoices: Bool
 
     static let `default` = SpeechSettings(
         selectedVoiceIdentifier: "com.apple.voice.compact.en-US.Samantha",
-        speechRate: 0.5 // Normal speed (maps to 1.0x in UI)
+        speechRate: 0.5, // Normal speed (maps to 1.0x in UI)
+        showOnlyHighQualityVoices: false
     )
 }
 

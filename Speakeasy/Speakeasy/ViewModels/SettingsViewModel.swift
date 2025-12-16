@@ -7,6 +7,10 @@ class SettingsViewModel: ObservableObject {
         didSet { checkForChanges() }
     }
 
+    @Published var showOnlyHighQualityVoices: Bool {
+        didSet { checkForChanges() }
+    }
+
     private var _uiSpeed: Float = 1.0
     var uiSpeed: Float {
         get { _uiSpeed }
@@ -22,8 +26,12 @@ class SettingsViewModel: ObservableObject {
 
     @Published private(set) var hasUnsavedChanges: Bool = false
 
-    let availableVoices: [Voice]
+    var availableVoices: [Voice] {
+        showOnlyHighQualityVoices ? highQualityVoices : allVoices
+    }
 
+    private let allVoices: [Voice]
+    private let highQualityVoices: [Voice]
     private let appState: AppState
     private var originalSettings: SpeechSettings
     private let voiceService = VoiceDiscoveryService()
@@ -35,9 +43,11 @@ class SettingsViewModel: ObservableObject {
         // Initialize from current settings
         self.selectedVoiceIdentifier = appState.settings.selectedVoiceIdentifier
         self._uiSpeed = appState.settings.uiSpeed
+        self.showOnlyHighQualityVoices = appState.settings.showOnlyHighQualityVoices
 
         // Load available voices
-        self.availableVoices = voiceService.discoverVoices()
+        self.allVoices = voiceService.discoverVoices()
+        self.highQualityVoices = voiceService.discoverHighQualityVoices()
     }
 
     /// Save settings to AppState
@@ -45,6 +55,7 @@ class SettingsViewModel: ObservableObject {
         var newSettings = appState.settings
         newSettings.selectedVoiceIdentifier = selectedVoiceIdentifier
         newSettings.setUISpeed(uiSpeed)
+        newSettings.showOnlyHighQualityVoices = showOnlyHighQualityVoices
 
         appState.settings = newSettings
         appState.saveSettings()
@@ -58,6 +69,7 @@ class SettingsViewModel: ObservableObject {
     func cancel() {
         selectedVoiceIdentifier = originalSettings.selectedVoiceIdentifier
         uiSpeed = originalSettings.uiSpeed
+        showOnlyHighQualityVoices = originalSettings.showOnlyHighQualityVoices
         hasUnsavedChanges = false
     }
 
@@ -76,7 +88,8 @@ class SettingsViewModel: ObservableObject {
     private func checkForChanges() {
         hasUnsavedChanges = (
             selectedVoiceIdentifier != originalSettings.selectedVoiceIdentifier ||
-            uiSpeed != originalSettings.uiSpeed
+            uiSpeed != originalSettings.uiSpeed ||
+            showOnlyHighQualityVoices != originalSettings.showOnlyHighQualityVoices
         )
     }
 }
