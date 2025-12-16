@@ -7,7 +7,7 @@ class SpeechEngine: NSObject, ObservableObject {
     private let synthesizer = AVSpeechSynthesizer()
     private var currentUtterance: AVSpeechUtterance?
 
-    var onProgress: ((Double, Int) -> Void)?
+    var onProgress: ((Double, NSRange) -> Void)?
     var onComplete: (() -> Void)?
 
     override init() {
@@ -78,7 +78,7 @@ extension SpeechEngine: AVSpeechSynthesizerDelegate {
         Task(priority: .userInitiated) { @MainActor in
             let totalCharacters = utterance.speechString.count
             let progress = totalCharacters > 0 ? Double(characterRange.location) / Double(totalCharacters) : 0.0
-            onProgress?(progress, totalCharacters)
+            onProgress?(progress, characterRange)
         }
     }
 

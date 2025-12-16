@@ -21,14 +21,11 @@ struct InputWindow: View {
             // Text input area
             ZStack(alignment: .topLeading) {
                 if isPlaybackActive {
-                    // Read-only text display during playback
-                    ScrollView {
-                        Text(displayText)
-                            .font(.body)
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                            .padding(4)
-                            .textSelection(.enabled)
-                    }
+                    // Read-only text display with word highlighting during playback
+                    HighlightedTextView(
+                        text: displayText,
+                        highlightRange: appState.currentWordRange
+                    )
                     .frame(minHeight: 150)
                     .background(Color(nsColor: .textBackgroundColor).opacity(0.7))
                     .cornerRadius(6)

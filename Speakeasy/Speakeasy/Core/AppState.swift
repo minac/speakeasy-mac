@@ -8,6 +8,7 @@ class AppState: ObservableObject {
     @Published var settings: SpeechSettings
     @Published var errorMessage: String?
     @Published var speechProgress: Double = 0.0
+    @Published var currentWordRange: NSRange?
 
     // Window visibility
     @Published var showInputWindow = false
@@ -102,6 +103,7 @@ class AppState: ObservableObject {
         speechEngine.stop()
         currentText = ""
         speechProgress = 0.0
+        currentWordRange = nil
     }
 
     // MARK: - Settings Management
@@ -128,9 +130,10 @@ class AppState: ObservableObject {
     // MARK: - Private Setup
 
     private func setupSpeechCallbacks() {
-        speechEngine.onProgress = { [weak self] progress, total in
+        speechEngine.onProgress = { [weak self] progress, wordRange in
             Task { @MainActor [weak self] in
                 self?.speechProgress = progress
+                self?.currentWordRange = wordRange
             }
         }
 
@@ -138,6 +141,7 @@ class AppState: ObservableObject {
             Task { @MainActor [weak self] in
                 self?.currentText = ""
                 self?.speechProgress = 0.0
+                self?.currentWordRange = nil
             }
         }
 
