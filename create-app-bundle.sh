@@ -12,7 +12,7 @@ fi
 echo "Building $CONFIG configuration..."
 
 # Build the executable
-swift build -c $CONFIG
+swift build -c $CONFIG --package-path Speakeasy
 
 # Create app bundle structure
 if [ "$CONFIG" = "release" ]; then
@@ -33,11 +33,11 @@ mkdir -p "$RESOURCES_DIR"
 
 # Copy executable
 echo "Copying executable..."
-cp .build/$CONFIG/Speakeasy "$MACOS_DIR/"
+cp Speakeasy/.build/$CONFIG/Speakeasy "$MACOS_DIR/"
 
 # Copy Info.plist
 echo "Copying Info.plist..."
-cp Speakeasy/Resources/Info.plist "$CONTENTS_DIR/"
+cp Speakeasy/Speakeasy/Resources/Info.plist "$CONTENTS_DIR/"
 
 # Set executable permissions
 chmod +x "$MACOS_DIR/Speakeasy"
