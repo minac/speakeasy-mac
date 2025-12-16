@@ -25,28 +25,29 @@ struct SettingsWindow: View {
             // Settings form
             Form {
                 Section("Voice") {
-                    Toggle("Show only enhanced/premium voices", isOn: $viewModel.showOnlyHighQualityVoices)
+                    HStack {
+                        VoicePicker(
+                            voices: viewModel.availableVoices,
+                            selectedVoiceIdentifier: $viewModel.selectedVoiceIdentifier
+                        )
 
-                    VoicePicker(
-                        voices: viewModel.availableVoices,
-                        selectedVoiceIdentifier: $viewModel.selectedVoiceIdentifier
-                    )
+                        Spacer()
+
+                        Toggle("Premium only", isOn: Binding(
+                            get: { viewModel.showOnlyHighQualityVoices },
+                            set: { newValue in
+                                viewModel.showOnlyHighQualityVoices = newValue
+                                if newValue, let firstVoice = viewModel.availableVoices.first {
+                                    viewModel.selectedVoiceIdentifier = firstVoice.id
+                                }
+                            }
+                        ))
+                        .toggleStyle(.checkbox)
+                    }
                 }
 
                 Section("Playback") {
                     SpeedSlider(speed: $viewModel.uiSpeed)
-                }
-
-                if viewModel.hasUnsavedChanges {
-                    Section {
-                        HStack {
-                            Image(systemName: "exclamationmark.circle.fill")
-                                .foregroundColor(.orange)
-                            Text("You have unsaved changes")
-                                .font(.caption)
-                                .foregroundColor(.secondary)
-                        }
-                    }
                 }
             }
             .formStyle(.grouped)
@@ -62,6 +63,11 @@ struct SettingsWindow: View {
                 .disabled(!canRestoreDefaults)
 
                 Spacer()
+
+                Image(systemName: "circle.fill")
+                    .font(.system(size: 8))
+                    .foregroundColor(.orange)
+                    .opacity(viewModel.hasUnsavedChanges ? 1 : 0)
 
                 Button("Cancel") {
                     viewModel.cancel()
@@ -79,7 +85,7 @@ struct SettingsWindow: View {
             }
             .padding()
         }
-        .frame(width: 500, height: 350)
+        .frame(width: 500, height: 280)
         .onAppear {
             // Activate the app and position window at top right
             NSApp.activate(ignoringOtherApps: true)
