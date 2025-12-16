@@ -16,29 +16,18 @@ struct MenuBarView: View {
             Button("Read Text...") {
                 openWindow(id: "input")
             }
-            .keyboardShortcut("r", modifiers: [.command])
 
             Button("Settings...") {
                 openWindow(id: "settings")
             }
-            .keyboardShortcut(",", modifiers: [.command])
 
             Divider()
 
             Button("Quit Speakeasy") {
                 NSApplication.shared.terminate(nil)
             }
-            .keyboardShortcut("q", modifiers: [.command])
         }
         .frame(width: 220)
-        .alert("Accessibility Permissions Required", isPresented: $appState.showPermissionsAlert) {
-            Button("Open System Settings") {
-                PermissionsManager.openAccessibilitySettings()
-            }
-            Button("Later", role: .cancel) {}
-        } message: {
-            Text("Speakeasy needs accessibility permissions to register global keyboard shortcuts.\n\nGo to System Settings > Privacy & Security > Accessibility and enable Speakeasy.")
-        }
     }
 
     @ViewBuilder
