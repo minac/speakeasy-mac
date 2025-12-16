@@ -4,251 +4,182 @@ Native macOS menu bar application for reading text and URLs aloud using Apple's 
 
 ## Features
 
-### 🎙️ Native Text-to-Speech
-- Powered by AVSpeechSynthesizer (built into macOS)
-- Access to all system voices (Samantha, Alex, etc.)
-- Speed adjustment (0.5x - 2.0x)
+- Native macOS text-to-speech using AVSpeechSynthesizer
+- Menu bar interface with SwiftUI
+- URL content extraction with HTML parsing
+- Customizable voice and playback speed
+- Real-time playback progress with word highlighting
 - Play, pause, resume, and stop controls
-- Real-time progress tracking
-- Completion callbacks
-
-### 🌐 Smart Text Extraction
-- URL detection with automatic HTTPS upgrade
-- HTTP fetching with timeout (30s)
-- HTML parsing via SwiftSoup
-- Automatic content cleaning (removes scripts, styles, navigation)
-- Whitespace normalization
-- Plain text passthrough for non-URLs
-
-### ⚙️ Settings Management
-- Full settings window with Save/Cancel/Restore Defaults
-- Voice picker with quality labels (Default/Enhanced/Premium)
-- Speed slider (0.5x - 2.0x) with real-time preview
-- Output directory selector with native file browser
-- Unsaved changes tracking
-- UserDefaults persistence with automatic save
-
-### ⌨️ Global Keyboard Shortcuts
-- System-wide hotkey support using Carbon Events API
-- Default shortcut: Cmd+Shift+P opens Input Window
-- Accessibility permissions management with user-friendly prompts
-- Automatic shortcut re-registration on settings change
-- Configurable shortcuts (stored in settings)
-
-### 🎨 Menu Bar Integration
-- Lives in menu bar (no dock icon)
-- Native SwiftUI interface
-- Dark mode support
-- Minimal, focused design
-
-## Architecture
-
-### Current Implementation (All Phases Complete)
-
-**Core Components:**
-- `AppState` - Central @MainActor coordinator for all app state
-- `SpeechEngine` - AVSpeechSynthesizer wrapper with delegate callbacks
-- `TextExtractor` - URLSession + SwiftSoup for web content extraction
-- `SettingsService` - UserDefaults persistence layer
-- `VoiceDiscoveryService` - System voice enumeration
-- `ShortcutManager` - Carbon Events API for global keyboard shortcuts
-- `PermissionsManager` - Accessibility permissions management
-
-**Models:**
-- `SpeechSettings` - Codable settings model with UI speed conversion
-- `Voice` - Wrapper for AVSpeechSynthesisVoice
-- `PlaybackState` - Enum: idle, speaking, paused
-
-**Views:**
-- `MenuBarView` - Menu bar interface with status and controls
-- `InputWindow` - Text/URL input with Play/Stop/Clear buttons
-- `SettingsWindow` - Comprehensive settings UI
-- `VoicePicker`, `SpeedSlider`, `DirectoryPicker` - Reusable components
-
-**ViewModels:**
-- `InputViewModel` - Manages input window state and processing
-- `SettingsViewModel` - Manages settings with unsaved changes tracking
-
-**Test Coverage:**
-- SpeechEngineTests - TTS functionality (8 tests)
-- TextExtractorTests - URL parsing and HTML extraction (23 tests)
-- SettingsServiceTests - Persistence layer (7 tests)
-- InputViewModelTests - Input window logic (11 tests)
-- SettingsViewModelTests - Settings management (13 tests)
-- ShortcutManagerTests - Global shortcuts and permissions (11 tests)
-
-### Error Handling & Progress Tracking (Phase 7 - Complete)
-
-- **Error Display**: User-friendly error messages shown in InputWindow
-- **Progress Tracking**: Real-time speech progress with percentage and progress bar
-- **Loading States**: Visual feedback during URL extraction and processing
-- **Context-Aware Errors**: Specific messages for URL extraction, speech, and validation failures
 
 ## Requirements
 
-- **macOS 13.0+** (for MenuBarExtra API)
-- **Xcode 14.0+** (for development)
-- **Swift 5.9+**
-- **Accessibility Permissions** (for global keyboard shortcuts)
+- macOS 14.0+
+- Xcode 15.0+ (for development)
+- Swift 5.9+
 
 ## Installation
 
-### From Source
+### Option 1: Download Release Build
 
-1. Clone the repository:
+1. Download the latest release from the Releases page
+2. Drag `Speakeasy.app` to your Applications folder
+3. Launch from Applications or Spotlight
+
+### Option 2: Build from Source
+
 ```bash
+# Clone the repository
 git clone https://github.com/minac/speakeasy-mac.git
-cd speakeasy-mac
+cd speakeasy-mac/Speakeasy
+
+# Build and create app bundle
+./create-app-bundle.sh release
+
+# Install to Applications
+cp -r build/release/Speakeasy.app /Applications/
 ```
 
-2. Open in Xcode:
+## Usage
+
+1. Click the speaker icon in the menu bar
+2. Select "Read Text..."
+3. Enter text or paste a URL
+4. Click "Play" (becomes "Stop" during playback)
+
+### Settings
+
+- **Voice**: Choose from available macOS system voices
+- **Speed**: Adjust playback speed (0.5x - 2.0x)
+
+### Getting Better Voices
+
+For more natural-sounding voices:
+
+1. Open **System Settings > Accessibility > Spoken Content**
+2. Click **System Voice > Manage Voices...**
+3. Download **Enhanced** or **Premium** versions
+
+Recommended voices:
+- **Samantha (Enhanced)** - US English, female
+- **Alex (Enhanced)** - US English, male
+- **Daniel (Enhanced)** - UK English, male
+
+## Development
+
+### Building
+
 ```bash
-cd Speakeasy
-open Package.swift
+# Debug build (for development)
+./create-app-bundle.sh debug
+open build/debug/Speakeasy-build.app
+
+# Release build (optimized)
+./create-app-bundle.sh release
+open build/release/Speakeasy.app
 ```
 
-3. Build and run (Cmd+R) or run tests (Cmd+U)
+### Running Tests
 
-### Swift Package Manager
-
-Build from command line:
 ```bash
-cd Speakeasy
-swift build
 swift test
 ```
 
-## Development
+Or in Xcode: **Cmd+U**
 
 ### Project Structure
 
 ```
 Speakeasy/
 ├── Speakeasy/
-│   ├── SpeakeasyApp.swift           # App entry point
+│   ├── SpeakeasyApp.swift              # App entry point
 │   ├── Core/
-│   │   ├── AppState.swift           # Central coordinator
-│   │   ├── SpeechEngine.swift       # TTS engine
-│   │   └── TextExtractor.swift      # URL/HTML parsing
+│   │   ├── AppState.swift              # Central state management
+│   │   ├── SpeechEngine.swift          # TTS engine wrapper
+│   │   └── TextExtractor.swift         # URL/HTML processing
 │   ├── Models/
-│   │   ├── SpeechSettings.swift
-│   │   ├── Voice.swift
-│   │   └── PlaybackState.swift
+│   │   ├── SpeechSettings.swift        # Settings model
+│   │   ├── Voice.swift                 # Voice wrapper
+│   │   └── PlaybackState.swift         # Playback states
 │   ├── Services/
-│   │   ├── SettingsService.swift
-│   │   └── VoiceDiscoveryService.swift
+│   │   ├── SettingsService.swift       # UserDefaults persistence
+│   │   └── VoiceDiscoveryService.swift # System voice enumeration
 │   ├── Views/
-│   │   ├── MenuBarView.swift
-│   │   ├── InputWindow.swift
-│   │   ├── SettingsWindow.swift
+│   │   ├── MenuBarView.swift           # Menu bar interface
+│   │   ├── InputWindow.swift           # Text input window
+│   │   ├── SettingsWindow.swift        # Settings interface
 │   │   └── Components/
 │   │       ├── VoicePicker.swift
 │   │       ├── SpeedSlider.swift
-│   │       └── DirectoryPicker.swift
+│   │       └── HighlightedTextView.swift
 │   ├── ViewModels/
 │   │   ├── InputViewModel.swift
 │   │   └── SettingsViewModel.swift
-│   └── Utilities/
-│       └── Extensions.swift         # String URL helpers
+│   └── Resources/
+│       └── Info.plist
 └── Tests/
     ├── CoreTests/
-    │   ├── SpeechEngineTests.swift
-    │   └── TextExtractorTests.swift
     ├── ServicesTests/
-    │   └── SettingsServiceTests.swift
     └── ViewModelTests/
-        ├── InputViewModelTests.swift
-        └── SettingsViewModelTests.swift
 ```
 
-### Running Tests
+## Architecture
 
-```bash
-# In Xcode: Cmd+U
-# Or via command line (requires full Xcode):
-swift test
-```
+### TTS Engine
 
-### Viewing Logs
+Uses Apple's native `AVSpeechSynthesizer` for high-quality text-to-speech without external dependencies.
 
-Speakeasy uses structured logging via macOS Unified Logging (`os.Logger`). View logs in real-time:
+### Text Extraction
 
-```bash
-# Stream logs while app is running
-log stream --predicate 'subsystem == "com.speakeasy.mac"' --level debug
+- **URLSession** for HTTP requests (30s timeout)
+- **SwiftSoup** for HTML parsing
+- Automatic content cleaning (removes scripts, styles, navigation)
 
-# Or use Console.app
-# 1. Open Console.app
-# 2. Filter by process name: "Speakeasy"
-# 3. Or filter by subsystem: "com.speakeasy.mac"
-```
+### State Management
 
-Log categories:
-- `speech` - TTS engine events
-- `extraction` - URL fetching and HTML parsing
-- `settings` - Settings persistence
-- `shortcuts` - Global keyboard shortcuts
-
-### Design Principles
-
-- **TDD:** Tests written before implementation
-- **NativeFirst:** Use Apple frameworks over external dependencies
-- **Simple:** Minimal abstractions, clear interfaces
-- **Production-Ready:** Error handling, logging, proper concurrency
+- **AppState**: Central `@MainActor ObservableObject` for app-wide state
+- **Swift Concurrency**: async/await throughout
+- **UserDefaults**: Settings persistence with Codable
 
 ## Dependencies
 
-- [SwiftSoup](https://github.com/scinfu/SwiftSoup) - HTML parsing (like BeautifulSoup for Swift)
+- [SwiftSoup](https://github.com/scinfu/SwiftSoup) - HTML parsing
 
-## Technical Details
+## Build System
 
-### Why Native TTS?
+The project uses Swift Package Manager with a custom build script to create proper macOS `.app` bundles.
 
-The original Python version used Piper TTS with ONNX models. The Swift rewrite uses AVSpeechSynthesizer because:
+**Why the custom script?**
 
-- **No external dependencies** - Built into macOS
-- **High quality voices** - Apple's neural TTS
-- **Better integration** - Native Swift async/await
-- **Simpler deployment** - No model files to distribute
-- **Maintained by Apple** - Automatic improvements with OS updates
+Swift Package Manager executables don't generate proper `.app` bundles with `Info.plist` by default. The `create-app-bundle.sh` script:
 
-### Thread Safety
+1. Builds the executable with `swift build`
+2. Creates proper `.app` bundle structure
+3. Copies `Info.plist` with bundle identifier
+4. Sets correct permissions
 
-- `SpeechEngine` uses `@MainActor` for UI thread safety
-- `TextExtractor` is an `actor` for thread-safe network operations
-- All delegate callbacks use `Task(priority: .userInitiated)` to avoid QoS inversions
+## Troubleshooting
 
-### Settings Persistence
+### Text input not working
 
-Settings use `Codable` + `UserDefaults` instead of JSON files:
-- Type-safe serialization
-- Automatic iCloud sync support
-- No file path management
-- Atomic writes
+Make sure you're running the app as a proper `.app` bundle (not via `swift run`), as terminal-launched apps capture keyboard input.
+
+## Contributing
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Write tests first (TDD)
+4. Implement feature
+5. Run tests (`swift test`)
+6. Commit your changes
+7. Push to the branch
+8. Open a Pull Request
 
 ## License
 
 MIT
 
-## Contributing
+## Acknowledgments
 
-This project follows TDD. Before submitting PRs:
-
-1. Write tests first
-2. Implement feature
-3. Ensure all tests pass (`swift test`)
-4. Follow existing code style
-5. Update documentation
-
-## Roadmap
-
-- [x] Phase 1: Core TTS with AVSpeechSynthesizer
-- [x] Phase 2: Text extraction from URLs
-- [x] Phase 3: Menu bar UI with AppState coordination
-- [x] Phase 4: Input window with text/URL entry
-- [x] Phase 5: Settings window with voice/speed/directory pickers
-- [x] Phase 6: Global keyboard shortcuts with accessibility permissions
-- [x] Phase 7: Polish and error handling
-- [ ] Future: Audio export to WAV
-- [ ] Future: Clipboard monitoring
-- [ ] Future: Voice customization (pitch, volume)
+- Built with Swift and SwiftUI
+- Uses AVSpeechSynthesizer for TTS
+- HTML parsing by SwiftSoup

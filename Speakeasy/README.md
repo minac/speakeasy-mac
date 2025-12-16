@@ -4,16 +4,16 @@ A macOS menu bar app for text-to-speech, supporting both plain text and URL cont
 
 ## Features
 
-- 🎤 Native macOS text-to-speech using AVSpeechSynthesizer
-- 📱 Menu bar interface with SwiftUI
-- 🌐 URL content extraction with HTML parsing
-- ⚙️ Customizable voice and playback speed
-- 📊 Real-time playback progress tracking
-- ⏯️ Play, pause, resume, and stop controls
+- Native macOS text-to-speech using AVSpeechSynthesizer
+- Menu bar interface with SwiftUI
+- URL content extraction with HTML parsing
+- Customizable voice and playback speed
+- Real-time playback progress with word highlighting
+- Play/Stop toggle button
 
 ## Requirements
 
-- macOS 13.0+
+- macOS 14.0+
 - Xcode 15.0+ (for development)
 - Swift 5.9+
 
@@ -36,7 +36,7 @@ cd speakeasy-mac/Speakeasy
 ./create-app-bundle.sh release
 
 # Install to Applications
-cp -r build/Speakeasy.app /Applications/
+cp -r build/release/Speakeasy.app /Applications/
 ```
 
 ## Development
@@ -46,10 +46,11 @@ cp -r build/Speakeasy.app /Applications/
 ```bash
 # Debug build (for development)
 ./create-app-bundle.sh debug
-open .build/debug/Speakeasy.app
+open build/debug/Speakeasy-build.app
 
 # Release build (optimized)
 ./create-app-bundle.sh release
+open build/release/Speakeasy.app
 ```
 
 ### Running Tests
@@ -72,6 +73,7 @@ Speakeasy/
 │   │   └── TextExtractor.swift         # URL/HTML processing
 │   ├── Models/
 │   │   ├── SpeechSettings.swift        # Settings model
+│   │   ├── Voice.swift                 # Voice wrapper
 │   │   └── PlaybackState.swift         # Playback states
 │   ├── Services/
 │   │   ├── SettingsService.swift       # UserDefaults persistence
@@ -79,7 +81,8 @@ Speakeasy/
 │   ├── Views/
 │   │   ├── MenuBarView.swift           # Menu bar interface
 │   │   ├── InputWindow.swift           # Text input window
-│   │   └── SettingsWindow.swift        # Settings interface
+│   │   ├── SettingsWindow.swift        # Settings interface
+│   │   └── Components/
 │   ├── ViewModels/
 │   │   ├── InputViewModel.swift
 │   │   └── SettingsViewModel.swift
@@ -95,35 +98,24 @@ Speakeasy/
 1. Click the speaker icon in the menu bar
 2. Select "Read Text..."
 3. Enter text or paste a URL
-4. Click "Play" or press **Cmd+Return**
-
-### Keyboard Shortcuts
-
-- **Cmd+R** - Open Read Text window
-- **Cmd+,** - Open Settings
-- **Cmd+Return** - Play text
-- **Cmd+K** - Clear input
-- **Cmd+.** - Stop playback
-- **Cmd+Q** - Quit app
+4. Click "Play" (button changes to "Stop" during playback)
 
 ### Settings
 
 - **Voice**: Choose from available macOS system voices
 - **Speed**: Adjust playback speed (0.5x - 2.0x)
-- **Output Directory**: Set default save location for audio exports (future feature)
 
 ### Getting Better Voices
 
 For more natural-sounding voices:
 
-1. Open **System Settings → Accessibility → Spoken Content**
-2. Click **System Voice → Manage Voices...**
+1. Open **System Settings > Accessibility > Spoken Content**
+2. Click **System Voice > Manage Voices...**
 3. Download **Enhanced** or **Premium** versions
 
 Recommended voices:
 - **Samantha (Enhanced)** - US English, female
 - **Alex (Enhanced)** - US English, male
-- **Tom** - US English, male
 - **Daniel (Enhanced)** - UK English, male
 
 ## Architecture
@@ -161,16 +153,9 @@ Swift Package Manager executables don't generate proper `.app` bundles with `Inf
 3. Copies `Info.plist` with bundle identifier
 4. Sets correct permissions
 
-## Known Issues
-
-- Global shortcuts require Accessibility permissions (not yet implemented)
-- Audio export feature planned but not implemented
+**Note:** Debug builds create `Speakeasy-build.app` to avoid conflicts with release builds.
 
 ## Troubleshooting
-
-### "Accessibility permissions not granted"
-
-This warning is expected. Global shortcuts are planned for a future update.
 
 ### Text input not working
 
@@ -180,15 +165,16 @@ Make sure you're running the app as a proper `.app` bundle (not via `swift run`)
 
 1. Fork the repository
 2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Make your changes
-4. Run tests (`swift test`)
-5. Commit your changes
-6. Push to the branch
-7. Open a Pull Request
+3. Write tests first (TDD)
+4. Implement feature
+5. Run tests (`swift test`)
+6. Commit your changes
+7. Push to the branch
+8. Open a Pull Request
 
 ## License
 
-[Add your license here]
+MIT
 
 ## Acknowledgments
 

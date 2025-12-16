@@ -30,7 +30,7 @@
 - **Thread Safety**: `@MainActor` for UI thread safety, delegate callbacks use `Task(priority: .userInitiated)`
 
 #### Target Platform
-- **macOS 13.0+** (for MenuBarExtra API)
+- **macOS 14.0+** (for SwiftUI onChange API)
 - **Swift 5.9+**
 - **SwiftUI** for all UI components
 - **Swift Package Manager** for dependencies
@@ -61,8 +61,7 @@ Speakeasy/
 │   ├── Core/
 │   │   ├── AppState.swift              # Central state coordinator
 │   │   ├── SpeechEngine.swift          # AVSpeechSynthesizer wrapper
-│   │   ├── TextExtractor.swift         # URLSession + SwiftSoup
-│   │   └── ShortcutManager.swift       # Global hotkeys (Phase 6)
+│   │   └── TextExtractor.swift         # URLSession + SwiftSoup
 │   ├── Models/
 │   │   ├── SpeechSettings.swift        # Codable settings
 │   │   ├── Voice.swift                 # AVSpeechSynthesisVoice wrapper
@@ -70,54 +69,30 @@ Speakeasy/
 │   ├── Services/
 │   │   ├── SettingsService.swift       # UserDefaults persistence
 │   │   └── VoiceDiscoveryService.swift # System voice enumeration
-│   ├── Views/                          # SwiftUI views (Phase 3+)
-│   ├── ViewModels/                     # View models (Phase 4+)
+│   ├── Views/
+│   │   ├── MenuBarView.swift           # Menu bar dropdown
+│   │   ├── InputWindow.swift           # Text/URL input window
+│   │   ├── SettingsWindow.swift        # Settings window
+│   │   └── Components/
+│   │       ├── VoicePicker.swift       # Voice selection dropdown
+│   │       ├── SpeedSlider.swift       # Speed adjustment slider
+│   │       └── HighlightedTextView.swift # Word highlighting during playback
+│   ├── ViewModels/
+│   │   ├── InputViewModel.swift        # Input window logic
+│   │   └── SettingsViewModel.swift     # Settings management
 │   └── Utilities/
-│       └── Extensions.swift            # String URL helpers
+│       ├── Extensions.swift            # String URL helpers
+│       └── Logger.swift                # Structured logging
 └── Tests/
     ├── CoreTests/
-    └── ServicesTests/
+    │   ├── SpeechEngineTests.swift
+    │   └── TextExtractorTests.swift
+    ├── ServicesTests/
+    │   └── SettingsServiceTests.swift
+    └── ViewModelTests/
+        ├── InputViewModelTests.swift
+        └── SettingsViewModelTests.swift
 ```
-
-### Implementation Phases
-
-**✅ Phase 1: Core TTS** (Complete)
-- SpeechEngine with AVSpeechSynthesizer
-- SettingsService with UserDefaults
-- VoiceDiscoveryService
-- Comprehensive test coverage
-
-**✅ Phase 2: Text Extraction** (Complete)
-- TextExtractor with URLSession + SwiftSoup
-- URL validation and normalization
-- HTML parsing and cleaning
-- Test coverage for all extraction logic
-
-**⏳ Phase 3: Menu Bar UI** (Next)
-- MenuBarExtra implementation
-- AppState central coordinator
-- Menu items: Read Text, Settings, Quit
-
-**📋 Phase 4: Input Window**
-- SwiftUI window for text/URL input
-- InputViewModel
-- Play/Stop controls
-
-**📋 Phase 5: Settings Window**
-- Voice picker
-- Speed slider
-- Output directory selector
-
-**📋 Phase 6: Global Shortcuts**
-- Carbon Events API (or MASShortcut library)
-- Accessibility permissions handling
-- Cmd+Shift+P default for "Read Text"
-
-**📋 Phase 7: Polish**
-- Error handling UI
-- Progress tracking
-- Loading states
-- Edge case handling
 
 ### Testing Strategy
 
@@ -126,6 +101,7 @@ Speakeasy/
 - **Network tests**: Real URL fetching (may be slow)
 - **QoS handling**: All async tasks use `.userInitiated` priority to avoid inversions
 - **Target**: 80%+ coverage
+- **Current**: 58 tests passing
 
 ### Key Technical Patterns
 
@@ -179,8 +155,6 @@ SpeechSettings.rateToUISpeed(_ rate: Float) -> Float
 ### Dependencies
 
 - **SwiftSoup** (2.6.0+): HTML parsing
-- **No Piper TTS**: Using native AVSpeechSynthesizer instead
-- **Optional MASShortcut**: For easier global shortcuts (Phase 6)
 
 ### Build & Test Commands
 
@@ -196,8 +170,8 @@ swift build
 # Build and create .app bundle (release)
 ./create-app-bundle.sh release
 
-# Install to Applications
-cp -r build/Speakeasy.app /Applications/
+# Install to Applications (release only)
+cp -r build/release/Speakeasy.app /Applications/
 
 # Test (requires full Xcode)
 swift test
@@ -210,14 +184,14 @@ swift test
 
 **Important:** Always use the `create-app-bundle.sh` script to create a proper `.app` bundle. Running via `swift run` or directly from Xcode will attach the app to the terminal/IDE, causing keyboard input issues.
 
+**Note:** Debug builds create `Speakeasy-build.app` to distinguish from release builds.
+
 ### App Configuration
 
 **Info.plist:**
 - `LSUIElement = true` (hide from dock)
 - `LSApplicationCategoryType = public.app-category.utilities`
-- `NSAppleEventsUsageDescription` for accessibility permissions
-
-**No App Sandbox**: Required for global shortcuts with accessibility permissions
+- `LSMinimumSystemVersion = 14.0`
 
 ### Differences from Python Version
 
@@ -229,7 +203,6 @@ swift test
 | HTML | BeautifulSoup | SwiftSoup |
 | Settings | JSON file | UserDefaults + Codable |
 | Threading | Queue-based | async/await |
-| Shortcuts | pynput (broken) | Carbon Events |
 
 ### Known Issues & Solutions
 
@@ -253,3 +226,4 @@ swift test
 - Multiple language support
 - Keyboard navigation in UI
 - VoiceOver accessibility support
+- Global keyboard shortcuts (requires accessibility permissions)
