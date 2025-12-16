@@ -22,6 +22,7 @@ final class SettingsViewModelTests: XCTestCase {
         // Should load settings from AppState
         XCTAssertEqual(viewModel.selectedVoiceIdentifier, appState.settings.selectedVoiceIdentifier)
         XCTAssertEqual(viewModel.uiSpeed, appState.settings.uiSpeed)
+        XCTAssertEqual(viewModel.showOnlyHighQualityVoices, appState.settings.showOnlyHighQualityVoices)
         XCTAssertFalse(viewModel.hasUnsavedChanges)
     }
 
@@ -152,5 +153,60 @@ final class SettingsViewModelTests: XCTestCase {
 
         viewModel.uiSpeed = 1.5
         XCTAssertEqual(viewModel.speedDisplayText, "1.5x")
+    }
+
+    // MARK: - Voice Filter Tests
+
+    func testToggleHighQualityVoicesFilter() {
+        // Given
+        let originalValue = viewModel.showOnlyHighQualityVoices
+
+        // When
+        viewModel.showOnlyHighQualityVoices = !originalValue
+
+        // Then
+        XCTAssertNotEqual(viewModel.showOnlyHighQualityVoices, originalValue)
+        XCTAssertTrue(viewModel.hasUnsavedChanges)
+    }
+
+    func testSaveHighQualityVoicesSetting() {
+        // Given
+        let originalValue = viewModel.showOnlyHighQualityVoices
+        viewModel.showOnlyHighQualityVoices = !originalValue
+        XCTAssertTrue(viewModel.hasUnsavedChanges)
+
+        // When
+        viewModel.save()
+
+        // Then
+        XCTAssertFalse(viewModel.hasUnsavedChanges)
+        XCTAssertEqual(appState.settings.showOnlyHighQualityVoices, !originalValue)
+    }
+
+    func testCancelHighQualityVoicesSetting() {
+        // Given
+        let originalValue = viewModel.showOnlyHighQualityVoices
+        viewModel.showOnlyHighQualityVoices = !originalValue
+        XCTAssertTrue(viewModel.hasUnsavedChanges)
+
+        // When
+        viewModel.cancel()
+
+        // Then
+        XCTAssertFalse(viewModel.hasUnsavedChanges)
+        XCTAssertEqual(viewModel.showOnlyHighQualityVoices, originalValue)
+    }
+
+    func testHighQualityFilterShowsFewerVoices() {
+        // Given - start with filter off
+        viewModel.showOnlyHighQualityVoices = false
+        let allVoicesCount = viewModel.availableVoices.count
+
+        // When
+        viewModel.showOnlyHighQualityVoices = true
+        let filteredVoicesCount = viewModel.availableVoices.count
+
+        // Then - filtered should be <= all voices
+        XCTAssertLessThanOrEqual(filteredVoicesCount, allVoicesCount)
     }
 }

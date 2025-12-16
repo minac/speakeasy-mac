@@ -25,26 +25,29 @@ struct SettingsWindow: View {
             // Settings form
             Form {
                 Section("Voice") {
-                    VoicePicker(
-                        voices: viewModel.availableVoices,
-                        selectedVoiceIdentifier: $viewModel.selectedVoiceIdentifier
-                    )
+                    HStack {
+                        VoicePicker(
+                            voices: viewModel.availableVoices,
+                            selectedVoiceIdentifier: $viewModel.selectedVoiceIdentifier
+                        )
+
+                        Spacer()
+
+                        Toggle("Premium only", isOn: Binding(
+                            get: { viewModel.showOnlyHighQualityVoices },
+                            set: { newValue in
+                                viewModel.showOnlyHighQualityVoices = newValue
+                                if let firstVoice = viewModel.availableVoices.first {
+                                    viewModel.selectedVoiceIdentifier = firstVoice.id
+                                }
+                            }
+                        ))
+                        .toggleStyle(.checkbox)
+                    }
                 }
 
                 Section("Playback") {
                     SpeedSlider(speed: $viewModel.uiSpeed)
-                }
-
-                if viewModel.hasUnsavedChanges {
-                    Section {
-                        HStack {
-                            Image(systemName: "exclamationmark.circle.fill")
-                                .foregroundColor(.orange)
-                            Text("You have unsaved changes")
-                                .font(.caption)
-                                .foregroundColor(.secondary)
-                        }
-                    }
                 }
             }
             .formStyle(.grouped)
@@ -60,6 +63,11 @@ struct SettingsWindow: View {
                 .disabled(!canRestoreDefaults)
 
                 Spacer()
+
+                Image(systemName: "circle.fill")
+                    .font(.system(size: 8))
+                    .foregroundColor(.orange)
+                    .opacity(viewModel.hasUnsavedChanges ? 1 : 0)
 
                 Button("Cancel") {
                     viewModel.cancel()
@@ -100,11 +108,13 @@ struct SettingsWindow: View {
 
     private var canRestoreDefaults: Bool {
         viewModel.selectedVoiceIdentifier != SpeechSettings.default.selectedVoiceIdentifier ||
-        viewModel.uiSpeed != SpeechSettings.default.uiSpeed
+        viewModel.uiSpeed != SpeechSettings.default.uiSpeed ||
+        viewModel.showOnlyHighQualityVoices != SpeechSettings.default.showOnlyHighQualityVoices
     }
 
     private func restoreDefaults() {
         viewModel.selectedVoiceIdentifier = SpeechSettings.default.selectedVoiceIdentifier
         viewModel.uiSpeed = SpeechSettings.default.uiSpeed
+        viewModel.showOnlyHighQualityVoices = SpeechSettings.default.showOnlyHighQualityVoices
     }
 }
