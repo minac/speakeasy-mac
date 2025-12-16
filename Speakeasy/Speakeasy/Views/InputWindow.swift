@@ -20,23 +20,42 @@ struct InputWindow: View {
 
             // Text input area
             ZStack(alignment: .topLeading) {
-                if viewModel.inputText.isEmpty {
-                    Text("Paste a URL or type text to read aloud...")
-                        .foregroundColor(.secondary)
-                        .padding(.horizontal, 4)
-                        .padding(.vertical, 8)
-                }
-
-                TextEditor(text: $viewModel.inputText)
-                    .font(.body)
+                if isPlaybackActive {
+                    // Read-only text display during playback
+                    ScrollView {
+                        Text(displayText)
+                            .font(.body)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .padding(4)
+                            .textSelection(.enabled)
+                    }
                     .frame(minHeight: 150)
-                    .scrollContentBackground(.hidden)
-                    .background(Color(nsColor: .textBackgroundColor))
+                    .background(Color(nsColor: .textBackgroundColor).opacity(0.7))
                     .cornerRadius(6)
                     .overlay(
                         RoundedRectangle(cornerRadius: 6)
-                            .stroke(Color.gray.opacity(0.3), lineWidth: 1)
+                            .stroke(Color.blue.opacity(0.5), lineWidth: 1)
                     )
+                } else {
+                    // Editable text input when idle
+                    if viewModel.inputText.isEmpty {
+                        Text("Paste a URL or type text to read aloud...")
+                            .foregroundColor(.secondary)
+                            .padding(.horizontal, 4)
+                            .padding(.vertical, 8)
+                    }
+
+                    TextEditor(text: $viewModel.inputText)
+                        .font(.body)
+                        .frame(minHeight: 150)
+                        .scrollContentBackground(.hidden)
+                        .background(Color(nsColor: .textBackgroundColor))
+                        .cornerRadius(6)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 6)
+                                .stroke(Color.gray.opacity(0.3), lineWidth: 1)
+                        )
+                }
             }
 
             // Error message
@@ -87,7 +106,7 @@ struct InputWindow: View {
                     viewModel.clear()
                 }
                 .keyboardShortcut("k", modifiers: [.command])
-                .disabled(viewModel.inputText.isEmpty)
+                .disabled(viewModel.inputText.isEmpty || isPlaybackActive)
 
                 Spacer()
 
@@ -143,6 +162,15 @@ struct InputWindow: View {
     }
 
     // MARK: - Helpers
+
+    private var isPlaybackActive: Bool {
+        appState.playbackState != .idle
+    }
+
+    private var displayText: String {
+        // Show the text being spoken (from AppState) or fall back to input
+        appState.currentText.isEmpty ? viewModel.inputText : appState.currentText
+    }
 
     private var playbackIcon: String {
         switch appState.playbackState {
