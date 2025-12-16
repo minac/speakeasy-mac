@@ -22,7 +22,6 @@ final class SettingsViewModelTests: XCTestCase {
         // Should load settings from AppState
         XCTAssertEqual(viewModel.selectedVoiceIdentifier, appState.settings.selectedVoiceIdentifier)
         XCTAssertEqual(viewModel.uiSpeed, appState.settings.uiSpeed)
-        XCTAssertEqual(viewModel.outputDirectory, appState.settings.outputDirectory)
         XCTAssertFalse(viewModel.hasUnsavedChanges)
     }
 
@@ -83,23 +82,6 @@ final class SettingsViewModelTests: XCTestCase {
         XCTAssertEqual(viewModel.uiSpeed, 1.0)
     }
 
-    // MARK: - Output Directory Tests
-
-    func testChangeOutputDirectory() {
-        // Given
-        let originalDirectory = viewModel.outputDirectory
-        // Use a directory that's guaranteed to be different
-        let newDirectory = originalDirectory.deletingLastPathComponent().appendingPathComponent("TestOutput")
-
-        // When
-        viewModel.outputDirectory = newDirectory
-
-        // Then
-        XCTAssertNotEqual(viewModel.outputDirectory, originalDirectory)
-        XCTAssertEqual(viewModel.outputDirectory, newDirectory)
-        XCTAssertTrue(viewModel.hasUnsavedChanges)
-    }
-
     // MARK: - Save Tests
 
     func testSaveSettings() {
@@ -126,7 +108,6 @@ final class SettingsViewModelTests: XCTestCase {
 
         viewModel.selectedVoiceIdentifier = newVoice.id
         viewModel.uiSpeed = 1.75
-        viewModel.outputDirectory = FileManager.default.temporaryDirectory
 
         // When
         viewModel.save()
@@ -135,7 +116,6 @@ final class SettingsViewModelTests: XCTestCase {
         XCTAssertFalse(viewModel.hasUnsavedChanges)
         XCTAssertEqual(appState.settings.selectedVoiceIdentifier, newVoice.id)
         XCTAssertEqual(appState.settings.uiSpeed, 1.75)
-        XCTAssertEqual(appState.settings.outputDirectory, FileManager.default.temporaryDirectory)
     }
 
     // MARK: - Cancel Tests
@@ -144,7 +124,6 @@ final class SettingsViewModelTests: XCTestCase {
         // Given
         let originalVoice = viewModel.selectedVoiceIdentifier
         let originalSpeed = viewModel.uiSpeed
-        let originalDirectory = viewModel.outputDirectory
 
         // Make changes (use a value different from original)
         let newSpeed: Float = originalSpeed == 1.5 ? 0.75 : 1.5
@@ -158,7 +137,6 @@ final class SettingsViewModelTests: XCTestCase {
         XCTAssertFalse(viewModel.hasUnsavedChanges)
         XCTAssertEqual(viewModel.selectedVoiceIdentifier, originalVoice)
         XCTAssertEqual(viewModel.uiSpeed, originalSpeed)
-        XCTAssertEqual(viewModel.outputDirectory, originalDirectory)
     }
 
     // MARK: - Validation Tests

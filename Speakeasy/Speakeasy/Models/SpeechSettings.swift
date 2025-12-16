@@ -3,22 +3,10 @@ import Foundation
 struct SpeechSettings: Codable {
     var selectedVoiceIdentifier: String
     var speechRate: Float  // 0.0 (slow) to 1.0 (fast) - AVSpeechSynthesizer range
-    var outputDirectory: URL
-    var shortcuts: ShortcutSettings
 
     static let `default` = SpeechSettings(
         selectedVoiceIdentifier: "com.apple.voice.compact.en-US.Samantha",
-        speechRate: 0.5, // Normal speed (maps to 1.0x in UI)
-        outputDirectory: FileManager.default.urls(for: .downloadsDirectory, in: .userDomainMask)[0],
-        shortcuts: ShortcutSettings.default
-    )
-}
-
-struct ShortcutSettings: Codable {
-    var readTextShortcut: String  // e.g., "cmd+shift+p"
-
-    static let `default` = ShortcutSettings(
-        readTextShortcut: "cmd+shift+p"
+        speechRate: 0.5 // Normal speed (maps to 1.0x in UI)
     )
 }
 
