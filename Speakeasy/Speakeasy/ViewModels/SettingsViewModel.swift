@@ -40,14 +40,21 @@ class SettingsViewModel: ObservableObject {
         self.appState = appState
         self.originalSettings = appState.settings
 
+        // Load available voices first
+        self.allVoices = voiceService.discoverVoices()
+        self.highQualityVoices = voiceService.discoverHighQualityVoices()
+
         // Initialize from current settings
-        self.selectedVoiceIdentifier = appState.settings.selectedVoiceIdentifier
         self._uiSpeed = appState.settings.uiSpeed
         self.showOnlyHighQualityVoices = appState.settings.showOnlyHighQualityVoices
 
-        // Load available voices
-        self.allVoices = voiceService.discoverVoices()
-        self.highQualityVoices = voiceService.discoverHighQualityVoices()
+        // Ensure a valid voice is selected based on current filter
+        let voices = appState.settings.showOnlyHighQualityVoices ? highQualityVoices : allVoices
+        if voices.contains(where: { $0.id == appState.settings.selectedVoiceIdentifier }) {
+            self.selectedVoiceIdentifier = appState.settings.selectedVoiceIdentifier
+        } else {
+            self.selectedVoiceIdentifier = voices.first?.id ?? allVoices.first?.id ?? ""
+        }
     }
 
     /// Save settings to AppState

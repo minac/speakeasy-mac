@@ -85,7 +85,7 @@ struct SettingsWindow: View {
             }
             .padding()
         }
-        .frame(width: 500, height: 320)
+        .frame(width: 500, height: 350)
         .onAppear {
             // Activate the app and position window at top right
             NSApp.activate(ignoringOtherApps: true)
