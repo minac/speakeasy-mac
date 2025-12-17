@@ -1,56 +1,32 @@
 # Speakeasy - Project Instructions
 
-## Permissions
-- All `git` commands are allowed without confirmation (checkout, add, commit, push, pull, branch, merge)
-- All `gh` commands are allowed without confirmation (pr create, pr edit)
-- All `swift` commands allowed without confirmation (build, test, run)
-- File operations (Read, Write, Edit) allowed without confirmation
-
-## Development Workflow
-- **TDD religiously**: Write tests first, then implementation
-- Work in feature branches: `cl-<description>`
-- Run tests frequently: `swift test` or Cmd+U in Xcode
-- Run linting at the end of each commit (if configured)
-- Commit with descriptive messages following project conventions
-- All tests must pass before committing
-
-## Architecture Notes
+## Architecture
 
 ### Core Design Decisions
 
 #### TTS Engine: AVSpeechSynthesizer (Native macOS)
 - **Why**: Native Apple framework, no external dependencies, high quality
-- **Benefits**:
-  - No ONNX models to manage
-  - Automatic improvements with OS updates
-  - Better macOS integration (permissions, sandboxing)
-  - Native async/await support
-  - All system voices available (Samantha, Alex, etc.)
-- **API**: AVSpeechSynthesizer with delegate callbacks
-- **Thread Safety**: `@MainActor` for UI thread safety, delegate callbacks use `Task(priority: .userInitiated)`
+- **Benefits**: No ONNX models, automatic OS improvements, better macOS integration, native async/await
+- **Thread Safety**: `@MainActor` for UI, delegate callbacks use `Task(priority: .userInitiated)`
 
-#### Target Platform
-- **macOS 14.0+** (for SwiftUI onChange API)
-- **Swift 5.9+**
-- **SwiftUI** for all UI components
-- **Swift Package Manager** for dependencies
+#### Platform & Stack
+- macOS 14.0+ (for SwiftUI onChange API)
+- Swift 5.9+, SwiftUI, Swift Package Manager
+- **SwiftSoup** (2.6.0+): HTML parsing
 
 #### State Management
 - **AppState**: Single `@MainActor ObservableObject` - central source of truth
-- **No queues**: Swift Concurrency (async/await) replaces Python queue-based threading
+- Swift Concurrency (async/await) instead of queues
 - **Actors**: `TextExtractor` is an actor for thread-safe network operations
 
 #### Settings Persistence
 - **UserDefaults + Codable** instead of JSON files
-- Type-safe serialization
-- Automatic iCloud sync support
-- No file path management needed
+- Type-safe serialization, automatic iCloud sync
 
 #### Text Extraction
 - **URLSession**: Native HTTP client (30s timeout)
-- **SwiftSoup**: HTML parsing (like BeautifulSoup)
-- **Content cleaning**: Removes script, style, nav, footer, aside tags
-- **Plain text passthrough**: Non-URLs returned as-is
+- Content cleaning: Removes script, style, nav, footer, aside tags
+- Plain text passthrough: Non-URLs returned as-is
 
 ### Project Structure
 
@@ -58,63 +34,28 @@
 speakeasy-mac/
 ├── create-app-bundle.sh                # Build script (run from root)
 ├── Speakeasy/
-│   ├── Package.swift                   # Swift Package Manager manifest
+│   ├── Package.swift
 │   ├── Speakeasy/
 │   │   ├── SpeakeasyApp.swift          # @main, MenuBarExtra
-│   │   ├── Core/
-│   │   │   ├── AppState.swift          # Central state coordinator
-│   │   │   ├── SpeechEngine.swift      # AVSpeechSynthesizer wrapper
-│   │   │   └── TextExtractor.swift     # URLSession + SwiftSoup
-│   │   ├── Models/
-│   │   │   ├── SpeechSettings.swift    # Codable settings
-│   │   │   ├── Voice.swift             # AVSpeechSynthesisVoice wrapper
-│   │   │   └── PlaybackState.swift     # idle/speaking/paused
-│   │   ├── Services/
-│   │   │   ├── SettingsService.swift   # UserDefaults persistence
-│   │   │   └── VoiceDiscoveryService.swift # System voice enumeration
-│   │   ├── Views/
-│   │   │   ├── MenuBarView.swift       # Menu bar dropdown
-│   │   │   ├── InputWindow.swift       # Text/URL input window
-│   │   │   ├── SettingsWindow.swift    # Settings window
-│   │   │   └── Components/
-│   │   │       ├── VoicePicker.swift
-│   │   │       ├── SpeedSlider.swift
-│   │   │       └── HighlightedTextView.swift
+│   │   ├── Core/                       # AppState, SpeechEngine, TextExtractor
+│   │   ├── Models/                     # SpeechSettings, Voice, PlaybackState
+│   │   ├── Services/                   # SettingsService, VoiceDiscoveryService
+│   │   ├── Views/                      # MenuBarView, InputWindow, SettingsWindow
 │   │   ├── ViewModels/
-│   │   │   ├── InputViewModel.swift
-│   │   │   └── SettingsViewModel.swift
-│   │   ├── Utilities/
-│   │   │   ├── Extensions.swift
-│   │   │   └── Logger.swift
-│   │   └── Resources/
-│   │       └── Info.plist
+│   │   └── Resources/Info.plist
 │   └── Tests/
-│       ├── CoreTests/
-│       ├── ServicesTests/
-│       └── ViewModelTests/
-└── build/                              # Output directory (gitignored)
+└── build/                              # Output (gitignored)
 ```
 
-### Testing Strategy
-
-- **Unit tests**: Fast, no UI dependencies
-- **Integration tests**: Cross-component functionality
-- **Network tests**: Real URL fetching (may be slow)
-- **QoS handling**: All async tasks use `.userInitiated` priority to avoid inversions
-
-### Key Technical Patterns
+### Key Patterns
 
 #### Speech Engine
 ```swift
 @MainActor
 class SpeechEngine: NSObject, ObservableObject {
     @Published private(set) var state: PlaybackState = .idle
-    private let synthesizer = AVSpeechSynthesizer()
-
     func speak(text: String, voiceIdentifier: String?, rate: Float) async throws
-    func pause()
-    func resume()
-    func stop()
+    func pause() / resume() / stop()
 }
 ```
 
@@ -122,25 +63,14 @@ class SpeechEngine: NSObject, ObservableObject {
 ```swift
 actor TextExtractor {
     func extractText(from input: String) async throws -> String
-    private func parseHTML(_ data: Data) throws -> String
 }
 ```
-
-#### Settings Service
-```swift
-class SettingsService {
-    func loadSettings() -> SpeechSettings
-    func saveSettings(_ settings: SpeechSettings)
-}
-```
-
-### Common Patterns
 
 #### URL Validation
 ```swift
 extension String {
     var isValidURL: Bool  // http://, https://, www.
-    func addingHTTPSIfNeeded() -> String?  // Normalizes to https://
+    func addingHTTPSIfNeeded() -> String?
 }
 ```
 
@@ -151,45 +81,28 @@ SpeechSettings.uiSpeedToRate(_ uiSpeed: Float) -> Float
 SpeechSettings.rateToUISpeed(_ rate: Float) -> Float
 ```
 
-### Dependencies
-
-- **SwiftSoup** (2.6.0+): HTML parsing
-
-### Build & Test Commands
-
-All commands run from project root:
+### Build Commands
 
 ```bash
 # Build executable only
 swift build --package-path Speakeasy
 
-# Build and create .app bundle (debug)
+# Build .app bundle (debug)
 ./create-app-bundle.sh
-# or
-./create-app-bundle.sh debug
 
-# Build and create .app bundle (release)
+# Build .app bundle (release)
 ./create-app-bundle.sh release
 
-# Install to Applications (release only)
+# Install to Applications
 cp -r build/release/Speakeasy.app /Applications/
 
-# Test (requires full Xcode)
+# Test
 swift test --package-path Speakeasy
-
-# In Xcode
-# Build: Cmd+B
-# Test: Cmd+U
-# Run: Cmd+R (warning: runs with Xcode scheme limitations)
 ```
 
-**Important:** Always use the `create-app-bundle.sh` script to create a proper `.app` bundle. Running via `swift run` or directly from Xcode will attach the app to the terminal/IDE, causing keyboard input issues.
+**Important:** Always use `create-app-bundle.sh` for proper `.app` bundle. Running via `swift run` causes keyboard input issues.
 
-**Note:** Debug builds create `Speakeasy-build.app` to distinguish from release builds.
-
-### App Configuration
-
-**Info.plist:**
+### App Configuration (Info.plist)
 - `LSUIElement = true` (hide from dock)
 - `LSApplicationCategoryType = public.app-category.utilities`
 - `LSMinimumSystemVersion = 14.0`
