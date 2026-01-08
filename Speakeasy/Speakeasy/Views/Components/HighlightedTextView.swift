@@ -1,63 +1,85 @@
 import SwiftUI
+import AppKit
 
-/// A text view that highlights the currently spoken word
-struct HighlightedTextView: View {
+/// A text view that highlights the currently spoken word and scrolls to follow it
+struct HighlightedTextView: NSViewRepresentable {
     let text: String
     let highlightRange: NSRange?
     var highlightColor: Color = .accentColor
 
-    var body: some View {
-        ScrollViewReader { proxy in
-            ScrollView {
-                Text(attributedText)
-                    .font(.body)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(4)
-                    .textSelection(.enabled)
-                    .id("textContent")
-            }
-            .onChange(of: highlightRange) { _, newRange in
-                // Auto-scroll to keep highlighted word visible
-                if newRange != nil {
-                    withAnimation(.easeInOut(duration: 0.1)) {
-                        proxy.scrollTo("textContent", anchor: .center)
-                    }
-                }
-            }
-        }
+    func makeNSView(context: Context) -> NSScrollView {
+        let scrollView = NSScrollView()
+        scrollView.hasVerticalScroller = true
+        scrollView.hasHorizontalScroller = false
+        scrollView.autohidesScrollers = true
+        scrollView.drawsBackground = false
+
+        let textView = NSTextView()
+        textView.isEditable = false
+        textView.isSelectable = true
+        textView.drawsBackground = false
+        textView.textContainerInset = NSSize(width: 4, height: 4)
+        textView.isVerticallyResizable = true
+        textView.isHorizontallyResizable = false
+        textView.autoresizingMask = [.width]
+        textView.textContainer?.widthTracksTextView = true
+        textView.textContainer?.containerSize = NSSize(
+            width: scrollView.contentSize.width,
+            height: CGFloat.greatestFiniteMagnitude
+        )
+
+        scrollView.documentView = textView
+        return scrollView
     }
 
-    private var attributedText: AttributedString {
-        var attributed = AttributedString(text)
+    func updateNSView(_ scrollView: NSScrollView, context: Context) {
+        guard let textView = scrollView.documentView as? NSTextView else { return }
 
-        guard let range = highlightRange,
-              range.location != NSNotFound,
-              range.location + range.length <= text.utf16.count else {
-            return attributed
+        // Update text content
+        let attributedString = NSMutableAttributedString(string: text)
+        let fullRange = NSRange(location: 0, length: attributedString.length)
+
+        // Base styling
+        attributedString.addAttributes([
+            .font: NSFont.systemFont(ofSize: NSFont.systemFontSize),
+            .foregroundColor: NSColor.textColor
+        ], range: fullRange)
+
+        // Apply highlight if we have a valid range
+        if let range = highlightRange,
+           range.location != NSNotFound,
+           range.location + range.length <= text.utf16.count {
+            let nsHighlightColor = NSColor(highlightColor)
+            attributedString.addAttributes([
+                .backgroundColor: nsHighlightColor,
+                .foregroundColor: NSColor.white
+            ], range: range)
         }
 
-        // Convert NSRange to String.Index range
-        let utf16 = text.utf16
-        guard let start = utf16.index(utf16.startIndex, offsetBy: range.location, limitedBy: utf16.endIndex),
-              let end = utf16.index(start, offsetBy: range.length, limitedBy: utf16.endIndex),
-              let swiftStart = start.samePosition(in: text),
-              let swiftEnd = end.samePosition(in: text) else {
-            return attributed
+        // Only update text if changed to avoid scroll jumping
+        if textView.attributedString() != attributedString {
+            textView.textStorage?.setAttributedString(attributedString)
+        } else if let range = highlightRange,
+                  range.location != NSNotFound,
+                  range.location + range.length <= text.utf16.count {
+            // Text same but highlight changed - just update attributes
+            textView.textStorage?.setAttributes([
+                .font: NSFont.systemFont(ofSize: NSFont.systemFontSize),
+                .foregroundColor: NSColor.textColor
+            ], range: fullRange)
+            textView.textStorage?.addAttributes([
+                .backgroundColor: NSColor(highlightColor),
+                .foregroundColor: NSColor.white
+            ], range: range)
         }
 
-        let swiftRange = swiftStart..<swiftEnd
-
-        // Convert to AttributedString indices
-        guard let attrStart = AttributedString.Index(swiftRange.lowerBound, within: attributed),
-              let attrEnd = AttributedString.Index(swiftRange.upperBound, within: attributed) else {
-            return attributed
+        // Scroll to keep highlighted word visible
+        if let range = highlightRange,
+           range.location != NSNotFound,
+           range.location + range.length <= text.utf16.count {
+            // Use scrollRangeToVisible to smoothly scroll to the highlighted word
+            textView.scrollRangeToVisible(range)
         }
-
-        // Apply highlight styling
-        attributed[attrStart..<attrEnd].backgroundColor = highlightColor
-        attributed[attrStart..<attrEnd].foregroundColor = .white
-
-        return attributed
     }
 }
 
