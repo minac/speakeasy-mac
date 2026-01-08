@@ -96,46 +96,99 @@ actor TextExtractor {
         return try parseHTMLString(html)
     }
 
-    /// Parses HTML string and extracts clean text (exposed for testing)
+    /// Parses HTML string and extracts clean text with paragraph structure preserved
     func parseHTMLString(_ html: String) throws -> String {
         do {
             let doc = try SwiftSoup.parse(html)
 
             // Remove unwanted elements
-            try doc.select("script, style, nav, footer, aside, header").remove()
+            try doc.select("script, style, nav, footer, aside, header, form, iframe, noscript").remove()
 
             // Extract text from body
             guard let body = doc.body() else {
                 return ""
             }
 
-            let text = try body.text()
+            // Extract paragraphs from block-level elements
+            let paragraphs = try extractParagraphs(from: body)
 
-            // Normalize whitespace
-            return text.components(separatedBy: .whitespacesAndNewlines)
-                .filter { !$0.isEmpty }
-                .joined(separator: " ")
+            // Join paragraphs with double newlines for speech pauses
+            return paragraphs.joined(separator: "\n\n")
         } catch {
             throw ExtractionError.parsingError(error.localizedDescription)
         }
+    }
+
+    /// Extracts text paragraphs from block-level elements
+    private func extractParagraphs(from element: Element) throws -> [String] {
+        var paragraphs: [String] = []
+
+        // Block-level elements that typically represent paragraphs
+        let blockSelectors = "p, h1, h2, h3, h4, h5, h6, li, blockquote, figcaption, td, th"
+
+        let blocks = try element.select(blockSelectors)
+
+        if blocks.isEmpty() {
+            // Fallback: if no block elements, get all text
+            let text = normalizeText(try element.text())
+            if !text.isEmpty {
+                paragraphs.append(text)
+            }
+        } else {
+            for block in blocks {
+                let text = normalizeText(try block.text())
+                if !text.isEmpty {
+                    paragraphs.append(text)
+                }
+            }
+        }
+
+        return paragraphs
+    }
+
+    /// Normalizes whitespace within a paragraph
+    private func normalizeText(_ text: String) -> String {
+        text.components(separatedBy: .whitespacesAndNewlines)
+            .filter { !$0.isEmpty }
+            .joined(separator: " ")
     }
 }
 
 // MARK: - Testing Support
 extension TextExtractor {
-    /// Exposed for testing - parses HTML synchronously
+    /// Exposed for testing - parses HTML synchronously with paragraph structure
     nonisolated func parseHTMLForTesting(_ html: String) throws -> String {
         let doc = try SwiftSoup.parse(html)
-        try doc.select("script, style, nav, footer, aside, header").remove()
+        try doc.select("script, style, nav, footer, aside, header, form, iframe, noscript").remove()
 
         guard let body = doc.body() else {
             return ""
         }
 
-        let text = try body.text()
+        // Extract paragraphs from block-level elements
+        let blockSelectors = "p, h1, h2, h3, h4, h5, h6, li, blockquote, figcaption, td, th"
+        let blocks = try body.select(blockSelectors)
 
-        return text.components(separatedBy: .whitespacesAndNewlines)
-            .filter { !$0.isEmpty }
-            .joined(separator: " ")
+        var paragraphs: [String] = []
+
+        if blocks.isEmpty() {
+            let text = try body.text().components(separatedBy: .whitespacesAndNewlines)
+                .filter { !$0.isEmpty }
+                .joined(separator: " ")
+            if !text.isEmpty {
+                paragraphs.append(text)
+            }
+        } else {
+            for block in blocks {
+                let text = try block.text().components(separatedBy: .whitespacesAndNewlines)
+                    .filter { !$0.isEmpty }
+                    .joined(separator: " ")
+                if !text.isEmpty {
+                    paragraphs.append(text)
+                }
+            }
+        }
+
+        return paragraphs.joined(separator: "\n\n")
     }
 }

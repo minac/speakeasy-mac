@@ -162,10 +162,8 @@ final class TextExtractorTests: XCTestCase {
         // When
         let result = try extractor.parseHTMLForTesting(html)
 
-        // Then
-        XCTAssertTrue(result.contains("First paragraph"))
-        XCTAssertTrue(result.contains("Second paragraph"))
-        XCTAssertTrue(result.contains("Third paragraph"))
+        // Then - paragraphs should be separated by double newlines
+        XCTAssertEqual(result, "First paragraph.\n\nSecond paragraph.\n\nThird paragraph.")
     }
 
     func testParseHTML_HandlesEmptyHTML() throws {
@@ -179,16 +177,54 @@ final class TextExtractorTests: XCTestCase {
         XCTAssertEqual(result, "")
     }
 
-    func testParseHTML_PreservesLineBreaks() throws {
+    func testParseHTML_PreservesParagraphBreaks() throws {
         // Given
         let html = "<html><body><p>Line 1</p><br><p>Line 2</p></body></html>"
 
         // When
         let result = try extractor.parseHTMLForTesting(html)
 
-        // Then
-        XCTAssertTrue(result.contains("Line 1"))
-        XCTAssertTrue(result.contains("Line 2"))
+        // Then - paragraphs should be separated by double newlines for speech pauses
+        XCTAssertEqual(result, "Line 1\n\nLine 2")
+    }
+
+    func testParseHTML_PreservesHeadingsAndParagraphs() throws {
+        // Given
+        let html = """
+        <html><body>
+            <h1>Main Title</h1>
+            <p>Introduction paragraph.</p>
+            <h2>Section One</h2>
+            <p>First section content.</p>
+        </body></html>
+        """
+
+        // When
+        let result = try extractor.parseHTMLForTesting(html)
+
+        // Then - each block element should be separated by double newlines
+        XCTAssertEqual(result, "Main Title\n\nIntroduction paragraph.\n\nSection One\n\nFirst section content.")
+    }
+
+    func testParseHTML_PreservesListItems() throws {
+        // Given
+        let html = """
+        <html><body>
+            <p>Here are the items:</p>
+            <ul>
+                <li>First item</li>
+                <li>Second item</li>
+                <li>Third item</li>
+            </ul>
+        </body></html>
+        """
+
+        // When
+        let result = try extractor.parseHTMLForTesting(html)
+
+        // Then - list items should be separate paragraphs
+        XCTAssertTrue(result.contains("Here are the items:"))
+        XCTAssertTrue(result.contains("First item\n\nSecond item\n\nThird item"))
     }
 
     // MARK: - Integration Tests (Network)
