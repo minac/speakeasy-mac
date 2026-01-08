@@ -2,7 +2,7 @@
 
 Native macOS menu bar application for reading text and URLs aloud using Apple's native text-to-speech.
 
-![Speakeasy reading text with word highlighting](screenshots/swift-version/read-window-while-reading.png)
+![Speakeasy reading text with word highlighting](docs/screenshots/read-window-while-reading.png)
 
 ## Features
 
@@ -49,19 +49,19 @@ cp -r build/release/Speakeasy.app /Applications/
 1. Click the speaker icon in the menu bar
 2. Select "Read Text..."
 
-![Menu bar dropdown](screenshots/swift-version/tray-menu.png)
+![Menu bar dropdown](docs/screenshots/tray-menu.png)
 
 3. Enter text or paste a URL
 4. Click "Play" (becomes "Stop" during playback)
 
-![Text input window](screenshots/swift-version/read-window-with-text.png)
+![Text input window](docs/screenshots/read-window-with-text.png)
 
 ### Settings
 
 - **Voice**: Choose from available macOS system voices
 - **Speed**: Adjust playback speed (0.5x - 2.0x)
 
-![Settings window](screenshots/swift-version/settings.png)
+![Settings window](docs/screenshots/settings.png)
 
 ### Getting Better Voices
 
