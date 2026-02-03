@@ -9,13 +9,16 @@ A macOS menu bar app for text-to-speech, supporting both plain text and URL cont
 - URL content extraction with HTML parsing
 - Customizable voice and playback speed
 - Real-time playback progress with word highlighting
-- Play/Stop toggle button
+- Playback controls: play/stop (input window), pause/resume/stop (menu bar)
+- Global keyboard shortcuts support (requires accessibility permissions)
+- Structured logging using OSLog
 
 ## Requirements
 
 - macOS 14.0+
 - Xcode 15.0+ (for development)
 - Swift 5.9+
+- Accessibility permissions (optional, only required for global keyboard shortcuts)
 
 ## Installation
 
@@ -29,7 +32,7 @@ A macOS menu bar app for text-to-speech, supporting both plain text and URL cont
 
 ```bash
 # Clone the repository
-git clone <your-repo-url>
+git clone https://github.com/minac/speakeasy-mac.git
 cd speakeasy-mac
 
 # Build and create app bundle
@@ -70,7 +73,8 @@ Speakeasy/
 │   ├── Core/
 │   │   ├── AppState.swift              # Central state management
 │   │   ├── SpeechEngine.swift          # TTS engine wrapper
-│   │   └── TextExtractor.swift         # URL/HTML processing
+│   │   ├── TextExtractor.swift         # URL/HTML processing
+│   │   └── ShortcutManager.swift       # Global keyboard shortcuts
 │   ├── Models/
 │   │   ├── SpeechSettings.swift        # Settings model
 │   │   ├── Voice.swift                 # Voice wrapper
@@ -78,6 +82,10 @@ Speakeasy/
 │   ├── Services/
 │   │   ├── SettingsService.swift       # UserDefaults persistence
 │   │   └── VoiceDiscoveryService.swift # System voice enumeration
+│   ├── Utilities/
+│   │   ├── Logger.swift                # OSLog structured logging
+│   │   ├── PermissionsManager.swift    # Accessibility permissions
+│   │   └── Extensions.swift            # String extensions
 │   ├── Views/
 │   │   ├── MenuBarView.swift           # Menu bar interface
 │   │   ├── InputWindow.swift           # Text input window
@@ -89,6 +97,9 @@ Speakeasy/
 │   └── Resources/
 │       └── Info.plist                  # App bundle configuration
 └── Tests/
+    ├── CoreTests/
+    ├── ServicesTests/
+    └── ViewModelTests/
 ```
 
 ## Usage
@@ -98,7 +109,12 @@ Speakeasy/
 1. Click the speaker icon in the menu bar
 2. Select "Read Text..."
 3. Enter text or paste a URL
-4. Click "Play" (button changes to "Stop" during playback)
+4. Click "Play" to start playback
+
+### Playback Controls
+
+- **Input Window**: Play/Stop toggle button
+- **Menu Bar**: During playback, pause/resume/stop buttons with progress indicator appear in the menu bar dropdown
 
 ### Settings
 
@@ -114,6 +130,7 @@ For more natural-sounding voices:
 3. Download **Enhanced** or **Premium** versions
 
 Recommended voices:
+
 - **Samantha (Enhanced)** - US English, female
 - **Alex (Enhanced)** - US English, male
 - **Daniel (Enhanced)** - UK English, male

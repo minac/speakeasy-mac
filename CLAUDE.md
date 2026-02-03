@@ -38,21 +38,36 @@
 ```
 speakeasy-mac/
 ├── create-app-bundle.sh                # Build script (run from root)
+├── local-ci.sh                         # Local CI (build + test)
+├── run.sh                              # Quick run (swift run)
 ├── Speakeasy/
 │   ├── Package.swift
 │   ├── Speakeasy/
 │   │   ├── SpeakeasyApp.swift          # @main, MenuBarExtra
-│   │   ├── Core/                       # AppState, SpeechEngine, TextExtractor
+│   │   ├── Core/                       # AppState, SpeechEngine, TextExtractor, ShortcutManager
 │   │   ├── Models/                     # SpeechSettings, Voice, PlaybackState
 │   │   ├── Services/                   # SettingsService, VoiceDiscoveryService
-│   │   ├── Views/                      # MenuBarView, InputWindow, SettingsWindow
+│   │   ├── Utilities/                  # Logger (OSLog), PermissionsManager, Extensions
+│   │   ├── Views/                      # MenuBarView, InputWindow, SettingsWindow, Components
 │   │   ├── ViewModels/
 │   │   └── Resources/Info.plist
-│   └── Tests/
+│   └── Tests/                          # CoreTests, ServicesTests, ViewModelTests
 └── build/                              # Output (gitignored)
 ```
 
 ### Key Patterns
+
+#### Structured Logging
+
+Uses OSLog for production-grade structured logging:
+
+```swift
+AppLogger.app.info("message")      // App lifecycle
+AppLogger.speech.debug("...")      // Speech engine
+AppLogger.extraction.error("...")  // URL/text extraction
+AppLogger.shortcuts.warning("...")  // Keyboard shortcuts
+AppLogger.settings.info("...")     // Settings persistence
+```
 
 #### Speech Engine
 
@@ -71,6 +86,24 @@ class SpeechEngine: NSObject, ObservableObject {
 actor TextExtractor {
     func extractText(from input: String) async throws -> String
 }
+```
+
+#### Keyboard Shortcuts
+
+```swift
+@MainActor
+class ShortcutManager {
+    func register(shortcut: String, action: @escaping () -> Void) -> Bool
+    // e.g., register(shortcut: "cmd+shift+p", action: { ... })
+}
+```
+
+#### Permissions
+
+```swift
+PermissionsManager.hasAccessibilityPermissions() -> Bool
+PermissionsManager.requestAccessibilityPermissions()
+PermissionsManager.openAccessibilitySettings()
 ```
 
 #### URL Validation
@@ -119,3 +152,10 @@ swift test --package-path Speakeasy
 - `LSUIElement = true` (hide from dock)
 - `LSApplicationCategoryType = public.app-category.utilities`
 - `LSMinimumSystemVersion = 14.0`
+- `NSAppleEventsUsageDescription` (accessibility permission prompt)
+
+### Playback Controls
+
+- **Input Window**: Play/Stop toggle button for starting/stopping playback
+- **Menu Bar**: Pause/Resume/Stop buttons appear in dropdown during active playback
+- **Playback States**: idle, speaking, paused (enum PlaybackState)
