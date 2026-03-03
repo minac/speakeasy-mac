@@ -33,13 +33,13 @@ class ShortcutManager {
     @discardableResult
     func register(shortcut: String, action: @escaping () -> Void) -> Bool {
         guard PermissionsManager.hasAccessibilityPermissions() else {
-            AppLogger.shortcuts.warning("Accessibility permissions not granted")
+            log.warn("Accessibility permissions not granted")
             return false
         }
 
         let (keyCode, modifiers) = parseShortcut(shortcut)
         guard let keyCode = keyCode, let modifiers = modifiers else {
-            AppLogger.shortcuts.error("Failed to parse shortcut: \(shortcut)")
+            log.error("Failed to parse shortcut", ctx: ["shortcut": shortcut])
             return false
         }
 
@@ -57,14 +57,14 @@ class ShortcutManager {
                                          &hotKeyRef)
 
         guard status == noErr, let hotKeyRef = hotKeyRef else {
-            AppLogger.shortcuts.error("Failed to register hotkey: \(shortcut) (status: \(status))")
+            log.error("Failed to register hotkey", ctx: ["shortcut": shortcut, "status": "\(status)"])
             return false
         }
 
         hotKeys[currentID] = hotKeyRef
         callbacks[currentID] = action
 
-        AppLogger.shortcuts.info("Registered shortcut: \(shortcut)")
+        log.info("Registered shortcut", ctx: ["shortcut": shortcut])
         return true
     }
 
@@ -107,13 +107,13 @@ class ShortcutManager {
             case "ctrl", "control":
                 modifiers |= UInt32(controlKey)
             default:
-                AppLogger.shortcuts.error("Unknown modifier: \(modifier)")
+                log.error("Unknown modifier", ctx: ["modifier": modifier])
                 return (nil, nil)
             }
         }
 
         guard modifiers != 0 else {
-            AppLogger.shortcuts.error("At least one modifier key is required")
+            log.error("At least one modifier key is required")
             return (nil, nil)
         }
 
