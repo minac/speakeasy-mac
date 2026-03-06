@@ -20,23 +20,24 @@ A macOS menu bar app for text-to-speech, supporting both plain text and URL cont
 
 ## Installation
 
-### Option 1: Download Release Build
-
-1. Download the latest release from the Releases page
-2. Drag `Speakeasy.app` to your Applications folder
-3. Launch from Applications or Spotlight
-
-### Option 2: Build from Source
+### Option 1: Homebrew (recommended)
 
 ```bash
-# Clone the repository
+brew tap minac/speakeasy-mac
+brew install --cask speakeasy
+```
+
+### Option 2: Direct Download
+
+1. Download the latest `.dmg` from [Releases](https://github.com/minac/speakeasy-mac/releases)
+2. Open the DMG and drag `Speakeasy.app` to Applications
+
+### Option 3: Build from Source
+
+```bash
 git clone https://github.com/minac/speakeasy-mac.git
 cd speakeasy-mac
-
-# Build and create app bundle
-./create-app-bundle.sh release
-
-# Install to Applications
+./run.sh build release
 cp -r build/release/Speakeasy.app /Applications/
 ```
 
@@ -46,11 +47,11 @@ cp -r build/release/Speakeasy.app /Applications/
 
 ```bash
 # Debug build (for development)
-./create-app-bundle.sh debug
+./run.sh build debug
 open build/debug/Speakeasy-build.app
 
 # Release build (optimized)
-./create-app-bundle.sh release
+./run.sh build release
 open build/release/Speakeasy.app
 ```
 
@@ -91,7 +92,9 @@ Speakeasy/
 │   │   ├── InputViewModel.swift
 │   │   └── SettingsViewModel.swift
 │   └── Resources/
-│       └── Info.plist                  # App bundle configuration
+│       ├── Info.plist                  # App bundle configuration
+│       ├── Speakeasy.entitlements      # Homebrew/direct entitlements
+│       └── Speakeasy-MAS.entitlements  # Mac App Store entitlements
 └── Tests/
     ├── CoreTests/
     ├── ServicesTests/
@@ -155,18 +158,18 @@ Uses Apple's native `AVSpeechSynthesizer` for high-quality text-to-speech withou
 
 ## Build System
 
-The project uses Swift Package Manager with a custom build script to create proper macOS `.app` bundles.
+The project uses Swift Package Manager with `run.sh` to build, sign, and package the app.
 
-**Why the custom script?**
+```bash
+./run.sh                    # Build and run (swift run)
+./run.sh build [debug|release]  # Build .app bundle
+./run.sh sign               # Code sign release build
+./run.sh dmg <version>      # Create signed + notarized DMG
+./run.sh mas <version>      # Create Mac App Store .pkg
+./run.sh release <version>  # Full pipeline: build → sign → dmg
+```
 
-Swift Package Manager executables don't generate proper `.app` bundles with `Info.plist` by default. The `create-app-bundle.sh` script:
-
-1. Builds the executable with `swift build`
-2. Creates proper `.app` bundle structure
-3. Copies `Info.plist` with bundle identifier
-4. Sets correct permissions
-
-**Note:** Debug builds create `Speakeasy-build.app` to avoid conflicts with release builds.
+Debug builds create `Speakeasy-build.app` to avoid conflicts with release builds.
 
 ## Troubleshooting
 
