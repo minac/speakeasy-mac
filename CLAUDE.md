@@ -37,9 +37,8 @@
 
 ```
 speakeasy-mac/
-├── create-app-bundle.sh                # Build script (run from root)
 ├── local-ci.sh                         # Local CI (build + test)
-├── run.sh                              # Quick run (swift run)
+├── run.sh                              # Build, sign, package, release
 ├── Speakeasy/
 │   ├── Package.swift
 │   ├── Speakeasy/
@@ -50,7 +49,7 @@ speakeasy-mac/
 │   │   ├── Utilities/                  # Logger (OSLog), Extensions
 │   │   ├── Views/                      # MenuBarView, InputWindow, SettingsWindow, Components
 │   │   ├── ViewModels/
-│   │   └── Resources/Info.plist
+│   │   └── Resources/                  # Info.plist, entitlements
 │   └── Tests/                          # CoreTests, ServicesTests, ViewModelTests
 └── build/                              # Output (gitignored)
 ```
@@ -111,10 +110,22 @@ SpeechSettings.rateToUISpeed(_ rate: Float) -> Float
 swift build --package-path Speakeasy
 
 # Build .app bundle (debug)
-./create-app-bundle.sh
+./run.sh build debug
 
 # Build .app bundle (release)
-./create-app-bundle.sh release
+./run.sh build release
+
+# Code sign release build
+./run.sh sign
+
+# Create signed + notarized DMG
+./run.sh dmg 1.0
+
+# Create MAS .pkg
+./run.sh mas 1.0
+
+# Full release pipeline (build → sign → dmg → notarize)
+./run.sh release 1.0
 
 # Install to Applications
 cp -r build/release/Speakeasy.app /Applications/
@@ -126,13 +137,15 @@ swift test --package-path Speakeasy
 ./local-ci.sh
 ```
 
-**Important:** Always use `create-app-bundle.sh` for proper `.app` bundle. Running via `swift run` causes keyboard input issues.
+**Important:** Always use `./run.sh build` for proper `.app` bundle. Running via `swift run` (or `./run.sh` with no args) causes keyboard input issues.
 
 ### App Configuration (Info.plist)
 
+- `CFBundleIdentifier = com.migueldavid.speakeasy`
 - `LSUIElement = true` (hide from dock)
 - `LSApplicationCategoryType = public.app-category.utilities`
 - `LSMinimumSystemVersion = 14.0`
+- `ITSAppUsesNonExemptEncryption = false`
 
 ### Playback Controls
 

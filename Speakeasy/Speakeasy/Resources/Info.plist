@@ -8,7 +8,7 @@
     <key>CFBundleExecutable</key>
     <string>Speakeasy</string>
     <key>CFBundleIdentifier</key>
-    <string>com.speakeasy.macos</string>
+    <string>com.migueldavid.speakeasy</string>
     <key>CFBundleInfoDictionaryVersion</key>
     <string>6.0</string>
     <key>CFBundleName</key>
@@ -31,5 +31,13 @@
     <!-- Minimum macOS Version -->
     <key>LSMinimumSystemVersion</key>
     <string>14.0</string>
+
+    <!-- Copyright -->
+    <key>NSHumanReadableCopyright</key>
+    <string>Copyright 2026 Miguel David. All rights reserved.</string>
+
+    <!-- No encryption (avoids export compliance review) -->
+    <key>ITSAppUsesNonExemptEncryption</key>
+    <false/>
 </dict>
 </plist>
