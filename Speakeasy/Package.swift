@@ -20,7 +20,11 @@ let package = Package(
             name: "Speakeasy",
             dependencies: ["SwiftSoup"],
             path: "Speakeasy",
-            exclude: ["Resources/Info.plist"]
+            exclude: [
+                "Resources/Info.plist",
+                "Resources/Speakeasy.entitlements",
+                "Resources/Speakeasy-MAS.entitlements",
+            ]
         ),
         .testTarget(
             name: "SpeakeasyTests",
