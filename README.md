@@ -22,26 +22,25 @@ Native macOS menu bar application for reading text and URLs aloud using Apple's 
 
 ## Installation
 
-> **Note:** This app is not code-signed (no Apple Developer ID). On first launch, macOS Gatekeeper will show a security warning. To bypass: **right-click the app → Open**. You only need to do this once.
-
-### Option 1: Download Release Build
-
-1. Download the latest release from the Releases page
-2. Drag `Speakeasy.app` to your Applications folder
-3. **First launch:** Right-click → Open (to bypass Gatekeeper)
-4. Launch normally from Applications or Spotlight
-
-### Option 2: Build from Source
+### Option 1: Homebrew (recommended)
 
 ```bash
-# Clone the repository
+brew tap minac/speakeasy-mac
+brew install --cask speakeasy
+```
+
+### Option 2: Direct Download
+
+1. Download the latest `.dmg` from [Releases](https://github.com/minac/speakeasy-mac/releases)
+2. Open the DMG and drag `Speakeasy.app` to Applications
+3. Launch from Applications or Spotlight
+
+### Option 3: Build from Source
+
+```bash
 git clone https://github.com/minac/speakeasy-mac.git
 cd speakeasy-mac
-
-# Build and create app bundle
-./create-app-bundle.sh release
-
-# Install to Applications
+./run.sh build release
 cp -r build/release/Speakeasy.app /Applications/
 ```
 
@@ -83,7 +82,7 @@ For more natural-sounding free voices for macOS:
 
 ```bash
 # Debug build (for development)
-./create-app-bundle.sh debug
+./run.sh build debug
 open build/debug/Speakeasy-build.app
 ```
 
@@ -127,7 +126,9 @@ Speakeasy/
 │   │   ├── InputViewModel.swift
 │   │   └── SettingsViewModel.swift
 │   └── Resources/
-│       └── Info.plist
+│       ├── Info.plist
+│       ├── Speakeasy.entitlements
+│       └── Speakeasy-MAS.entitlements
 └── Tests/
     ├── CoreTests/
     ├── ServicesTests/
@@ -140,16 +141,18 @@ Speakeasy/
 
 ## Build System
 
-The project uses Swift Package Manager with a custom build script to create proper macOS `.app` bundles.
+The project uses Swift Package Manager with `run.sh` to build, sign, and package the app.
 
-**Why the custom script?**
+```bash
+./run.sh                    # Build and run (swift run)
+./run.sh build [debug|release]  # Build .app bundle
+./run.sh sign               # Code sign release build
+./run.sh dmg <version>      # Create signed + notarized DMG
+./run.sh mas <version>      # Create Mac App Store .pkg
+./run.sh release <version>  # Full pipeline: build → sign → dmg
+```
 
-Swift Package Manager executables don't generate proper `.app` bundles with `Info.plist` by default. The `create-app-bundle.sh` script:
-
-1. Builds the executable with `swift build`
-2. Creates proper `.app` bundle structure
-3. Copies `Info.plist` with bundle identifier
-4. Sets correct permissions
+Releases are automated via GitHub Actions — pushing a `v*` tag builds, signs, notarizes, and publishes a DMG to GitHub Releases.
 
 ## Troubleshooting
 
