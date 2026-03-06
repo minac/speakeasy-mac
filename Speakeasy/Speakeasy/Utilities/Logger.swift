@@ -19,7 +19,8 @@ public final class AppLogger: Sendable {
         #if os(iOS) || os(tvOS) || os(watchOS)
         let base = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
         #else
-        let base = URL(fileURLWithPath: FileManager.default.currentDirectoryPath)
+        let base = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first!
+            .appendingPathComponent("Speakeasy")
         #endif
         let logsDir = base.appendingPathComponent("logs")
         try? FileManager.default.createDirectory(at: logsDir, withIntermediateDirectories: true)

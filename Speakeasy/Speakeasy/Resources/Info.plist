@@ -28,10 +28,6 @@
     <key>LSApplicationCategoryType</key>
     <string>public.app-category.utilities</string>
 
-    <!-- Permissions Descriptions -->
-    <key>NSAppleEventsUsageDescription</key>
-    <string>Speakeasy needs accessibility permissions to register global keyboard shortcuts.</string>
-
     <!-- Minimum macOS Version -->
     <key>LSMinimumSystemVersion</key>
     <string>14.0</string>
