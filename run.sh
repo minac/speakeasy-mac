@@ -129,7 +129,7 @@ cmd_dmg() {
     echo "Notarizing..."
     xcrun notarytool submit "$dmg" \
         --keychain-profile "$NOTARY_PROFILE" \
-        --wait
+        --wait --timeout 30m
 
     echo "Stapling..."
     xcrun stapler staple "$dmg"
