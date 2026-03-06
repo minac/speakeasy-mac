@@ -10,7 +10,6 @@ A macOS menu bar app for text-to-speech, supporting both plain text and URL cont
 - Customizable voice and playback speed
 - Real-time playback progress with word highlighting
 - Playback controls: play/stop (input window), pause/resume/stop (menu bar)
-- Global keyboard shortcuts support (requires accessibility permissions)
 - Structured logging using OSLog
 
 ## Requirements
@@ -18,7 +17,6 @@ A macOS menu bar app for text-to-speech, supporting both plain text and URL cont
 - macOS 14.0+
 - Xcode 15.0+ (for development)
 - Swift 5.9+
-- Accessibility permissions (optional, only required for global keyboard shortcuts)
 
 ## Installation
 
@@ -73,8 +71,7 @@ Speakeasy/
 │   ├── Core/
 │   │   ├── AppState.swift              # Central state management
 │   │   ├── SpeechEngine.swift          # TTS engine wrapper
-│   │   ├── TextExtractor.swift         # URL/HTML processing
-│   │   └── ShortcutManager.swift       # Global keyboard shortcuts
+│   │   └── TextExtractor.swift         # URL/HTML processing
 │   ├── Models/
 │   │   ├── SpeechSettings.swift        # Settings model
 │   │   ├── Voice.swift                 # Voice wrapper
@@ -84,7 +81,6 @@ Speakeasy/
 │   │   └── VoiceDiscoveryService.swift # System voice enumeration
 │   ├── Utilities/
 │   │   ├── Logger.swift                # OSLog structured logging
-│   │   ├── PermissionsManager.swift    # Accessibility permissions
 │   │   └── Extensions.swift            # String extensions
 │   ├── Views/
 │   │   ├── MenuBarView.swift           # Menu bar interface

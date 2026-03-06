@@ -44,10 +44,10 @@ speakeasy-mac/
 │   ├── Package.swift
 │   ├── Speakeasy/
 │   │   ├── SpeakeasyApp.swift          # @main, MenuBarExtra
-│   │   ├── Core/                       # AppState, SpeechEngine, TextExtractor, ShortcutManager
+│   │   ├── Core/                       # AppState, SpeechEngine, TextExtractor
 │   │   ├── Models/                     # SpeechSettings, Voice, PlaybackState
 │   │   ├── Services/                   # SettingsService, VoiceDiscoveryService
-│   │   ├── Utilities/                  # Logger (OSLog), PermissionsManager, Extensions
+│   │   ├── Utilities/                  # Logger (OSLog), Extensions
 │   │   ├── Views/                      # MenuBarView, InputWindow, SettingsWindow, Components
 │   │   ├── ViewModels/
 │   │   └── Resources/Info.plist
@@ -65,7 +65,6 @@ Uses OSLog for production-grade structured logging:
 AppLogger.app.info("message")      // App lifecycle
 AppLogger.speech.debug("...")      // Speech engine
 AppLogger.extraction.error("...")  // URL/text extraction
-AppLogger.shortcuts.warning("...")  // Keyboard shortcuts
 AppLogger.settings.info("...")     // Settings persistence
 ```
 
@@ -86,24 +85,6 @@ class SpeechEngine: NSObject, ObservableObject {
 actor TextExtractor {
     func extractText(from input: String) async throws -> String
 }
-```
-
-#### Keyboard Shortcuts
-
-```swift
-@MainActor
-class ShortcutManager {
-    func register(shortcut: String, action: @escaping () -> Void) -> Bool
-    // e.g., register(shortcut: "cmd+shift+p", action: { ... })
-}
-```
-
-#### Permissions
-
-```swift
-PermissionsManager.hasAccessibilityPermissions() -> Bool
-PermissionsManager.requestAccessibilityPermissions()
-PermissionsManager.openAccessibilitySettings()
 ```
 
 #### URL Validation
@@ -152,7 +133,6 @@ swift test --package-path Speakeasy
 - `LSUIElement = true` (hide from dock)
 - `LSApplicationCategoryType = public.app-category.utilities`
 - `LSMinimumSystemVersion = 14.0`
-- `NSAppleEventsUsageDescription` (accessibility permission prompt)
 
 ### Playback Controls
 
