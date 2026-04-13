@@ -139,7 +139,7 @@ struct InputWindow: View {
             }
         }
         .padding()
-        .frame(width: 600, height: 360)
+        .frame(minWidth: 600, maxWidth: 600, minHeight: 360, maxHeight: .infinity)
         .onAppear {
             // Activate the app and bring window to front
             NSApp.activate(ignoringOtherApps: true)
