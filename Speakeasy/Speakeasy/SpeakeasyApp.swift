@@ -29,7 +29,8 @@ struct SpeakeasyApp: App {
             InputWindow(appState: appState)
                 .environmentObject(appState)
         }
-        .windowResizability(.contentSize)
+        .windowResizability(.contentMinSize)
+        .defaultSize(width: 600, height: 360)
         .defaultPosition(.topTrailing)
 
         // Settings window

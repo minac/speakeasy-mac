@@ -24,26 +24,19 @@ struct SettingsWindow: View {
 
             // Settings form
             Form {
-                Section("Voice") {
-                    HStack {
-                        VoicePicker(
-                            voices: viewModel.availableVoices,
-                            selectedVoiceIdentifier: $viewModel.selectedVoiceIdentifier
-                        )
-
-                        Spacer()
-
-                        Toggle("Premium only", isOn: Binding(
-                            get: { viewModel.showOnlyHighQualityVoices },
-                            set: { newValue in
-                                viewModel.showOnlyHighQualityVoices = newValue
-                                if let firstVoice = viewModel.availableVoices.first {
-                                    viewModel.selectedVoiceIdentifier = firstVoice.id
-                                }
-                            }
-                        ))
-                        .toggleStyle(.checkbox)
+                Section("Engine") {
+                    Picker("TTS Engine", selection: $viewModel.ttsEngine) {
+                        ForEach(TTSEngine.allCases, id: \.self) { engine in
+                            Text(engine.displayName).tag(engine)
+                        }
                     }
+                    .pickerStyle(.segmented)
+                }
+
+                if viewModel.ttsEngine == .system {
+                    systemVoiceSection
+                } else {
+                    googleCloudSection
                 }
 
                 Section("Playback") {
@@ -85,9 +78,8 @@ struct SettingsWindow: View {
             }
             .padding()
         }
-        .frame(width: 500, height: 350)
+        .frame(width: 500, height: 420)
         .onAppear {
-            // Activate the app and position window at top right
             NSApp.activate(ignoringOtherApps: true)
 
             DispatchQueue.main.async {
@@ -104,17 +96,97 @@ struct SettingsWindow: View {
         }
     }
 
+    // MARK: - System Voice Section
+
+    @ViewBuilder
+    private var systemVoiceSection: some View {
+        Section("Voice") {
+            HStack {
+                VoicePicker(
+                    voices: viewModel.availableVoices,
+                    selectedVoiceIdentifier: $viewModel.selectedVoiceIdentifier
+                )
+
+                Spacer()
+
+                Toggle("Premium only", isOn: Binding(
+                    get: { viewModel.showOnlyHighQualityVoices },
+                    set: { newValue in
+                        viewModel.showOnlyHighQualityVoices = newValue
+                        if let firstVoice = viewModel.availableVoices.first {
+                            viewModel.selectedVoiceIdentifier = firstVoice.id
+                        }
+                    }
+                ))
+                .toggleStyle(.checkbox)
+            }
+        }
+    }
+
+    // MARK: - Google Cloud Section
+
+    @ViewBuilder
+    private var googleCloudSection: some View {
+        Section("Google Cloud TTS") {
+            SecureField("API Key", text: $viewModel.googleCloudAPIKey)
+                .textFieldStyle(.roundedBorder)
+                .onChange(of: viewModel.googleCloudAPIKey) {
+                    // Debounce: fetch voices after key entry
+                    if !viewModel.googleCloudAPIKey.isEmpty {
+                        viewModel.fetchGoogleVoices()
+                    }
+                }
+
+            if viewModel.isLoadingGoogleVoices {
+                HStack {
+                    ProgressView()
+                        .scaleEffect(0.7)
+                    Text("Loading voices...")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
+            } else if let error = viewModel.googleVoiceError {
+                HStack {
+                    Image(systemName: "exclamationmark.triangle.fill")
+                        .foregroundColor(.red)
+                    Text(error)
+                        .font(.caption)
+                        .foregroundColor(.red)
+                }
+            } else if !viewModel.googleVoices.isEmpty {
+                VoicePicker(
+                    voices: viewModel.googleVoices,
+                    selectedVoiceIdentifier: $viewModel.googleVoiceName
+                )
+            } else if !viewModel.googleCloudAPIKey.isEmpty {
+                Text("Enter API key and press Return to load voices")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+            } else {
+                Text("Enter your Google Cloud API key to get started")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+            }
+        }
+    }
+
     // MARK: - Helpers
 
     private var canRestoreDefaults: Bool {
         viewModel.selectedVoiceIdentifier != SpeechSettings.default.selectedVoiceIdentifier ||
         viewModel.uiSpeed != SpeechSettings.default.uiSpeed ||
-        viewModel.showOnlyHighQualityVoices != SpeechSettings.default.showOnlyHighQualityVoices
+        viewModel.showOnlyHighQualityVoices != SpeechSettings.default.showOnlyHighQualityVoices ||
+        viewModel.ttsEngine != SpeechSettings.default.ttsEngine ||
+        !viewModel.googleCloudAPIKey.isEmpty ||
+        viewModel.googleVoiceName != SpeechSettings.default.googleVoiceName
     }
 
     private func restoreDefaults() {
         viewModel.selectedVoiceIdentifier = SpeechSettings.default.selectedVoiceIdentifier
         viewModel.uiSpeed = SpeechSettings.default.uiSpeed
         viewModel.showOnlyHighQualityVoices = SpeechSettings.default.showOnlyHighQualityVoices
+        viewModel.ttsEngine = SpeechSettings.default.ttsEngine
+        viewModel.googleCloudAPIKey = ""
+        viewModel.googleVoiceName = SpeechSettings.default.googleVoiceName
     }
 }
