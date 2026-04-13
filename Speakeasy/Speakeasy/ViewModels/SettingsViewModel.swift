@@ -55,11 +55,13 @@ class SettingsViewModel: ObservableObject {
     private let highQualityVoices: [Voice]
     private let appState: AppState
     private var originalSettings: SpeechSettings
+    private var originalAPIKey: String
     private let voiceService = VoiceDiscoveryService()
 
     init(appState: AppState) {
         self.appState = appState
         self.originalSettings = appState.settings
+        self.originalAPIKey = appState.googleCloudAPIKey
 
         // Load available system voices
         self.allVoices = voiceService.discoverVoices()
@@ -69,7 +71,7 @@ class SettingsViewModel: ObservableObject {
         self._uiSpeed = appState.settings.uiSpeed
         self.showOnlyHighQualityVoices = appState.settings.showOnlyHighQualityVoices
         self.ttsEngine = appState.settings.ttsEngine
-        self.googleCloudAPIKey = appState.settings.googleCloudAPIKey
+        self.googleCloudAPIKey = appState.googleCloudAPIKey
         self.googleVoiceName = appState.settings.googleVoiceName
 
         // Ensure a valid system voice is selected
@@ -125,7 +127,6 @@ class SettingsViewModel: ObservableObject {
         newSettings.setUISpeed(uiSpeed)
         newSettings.showOnlyHighQualityVoices = showOnlyHighQualityVoices
         newSettings.ttsEngine = ttsEngine
-        newSettings.googleCloudAPIKey = googleCloudAPIKey
         newSettings.googleVoiceName = googleVoiceName
 
         // Derive language code from selected Google voice name
@@ -140,7 +141,11 @@ class SettingsViewModel: ObservableObject {
         appState.saveSettings()
         appState.googleVoices = googleVoices
 
+        // Save API key to Keychain
+        appState.googleCloudAPIKey = googleCloudAPIKey
+
         originalSettings = newSettings
+        originalAPIKey = googleCloudAPIKey
         hasUnsavedChanges = false
     }
 
@@ -150,7 +155,7 @@ class SettingsViewModel: ObservableObject {
         uiSpeed = originalSettings.uiSpeed
         showOnlyHighQualityVoices = originalSettings.showOnlyHighQualityVoices
         ttsEngine = originalSettings.ttsEngine
-        googleCloudAPIKey = originalSettings.googleCloudAPIKey
+        googleCloudAPIKey = originalAPIKey
         googleVoiceName = originalSettings.googleVoiceName
         googleVoices = appState.googleVoices
         hasUnsavedChanges = false
@@ -177,7 +182,7 @@ class SettingsViewModel: ObservableObject {
             uiSpeed != originalSettings.uiSpeed ||
             showOnlyHighQualityVoices != originalSettings.showOnlyHighQualityVoices ||
             ttsEngine != originalSettings.ttsEngine ||
-            googleCloudAPIKey != originalSettings.googleCloudAPIKey ||
+            googleCloudAPIKey != originalAPIKey ||
             googleVoiceName != originalSettings.googleVoiceName
         )
     }

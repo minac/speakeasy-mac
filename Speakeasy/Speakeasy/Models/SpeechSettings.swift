@@ -8,8 +8,7 @@ struct SpeechSettings: Codable {
     // TTS Engine selection
     var ttsEngine: TTSEngine
 
-    // Google Cloud TTS settings
-    var googleCloudAPIKey: String
+    // Google Cloud TTS settings (API key stored in Keychain, not here)
     var googleVoiceName: String      // e.g. "en-US-Neural2-A"
     var googleLanguageCode: String   // e.g. "en-US"
 
@@ -18,7 +17,6 @@ struct SpeechSettings: Codable {
         speechRate: 0.5, // Normal speed (maps to 1.0x in UI)
         showOnlyHighQualityVoices: false,
         ttsEngine: .system,
-        googleCloudAPIKey: "",
         googleVoiceName: "en-US-Neural2-D",
         googleLanguageCode: "en-US"
     )

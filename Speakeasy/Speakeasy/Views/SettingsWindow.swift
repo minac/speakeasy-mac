@@ -177,7 +177,7 @@ struct SettingsWindow: View {
         viewModel.uiSpeed != SpeechSettings.default.uiSpeed ||
         viewModel.showOnlyHighQualityVoices != SpeechSettings.default.showOnlyHighQualityVoices ||
         viewModel.ttsEngine != SpeechSettings.default.ttsEngine ||
-        viewModel.googleCloudAPIKey != SpeechSettings.default.googleCloudAPIKey ||
+        !viewModel.googleCloudAPIKey.isEmpty ||
         viewModel.googleVoiceName != SpeechSettings.default.googleVoiceName
     }
 
@@ -186,7 +186,7 @@ struct SettingsWindow: View {
         viewModel.uiSpeed = SpeechSettings.default.uiSpeed
         viewModel.showOnlyHighQualityVoices = SpeechSettings.default.showOnlyHighQualityVoices
         viewModel.ttsEngine = SpeechSettings.default.ttsEngine
-        viewModel.googleCloudAPIKey = SpeechSettings.default.googleCloudAPIKey
+        viewModel.googleCloudAPIKey = ""
         viewModel.googleVoiceName = SpeechSettings.default.googleVoiceName
     }
 }

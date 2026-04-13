@@ -26,6 +26,12 @@ class AppState: ObservableObject {
     @Published var googleVoices: [Voice] = []
     @Published var isLoadingGoogleVoices = false
 
+    // Google Cloud API key (stored in Keychain, not UserDefaults)
+    var googleCloudAPIKey: String {
+        get { KeychainService.load(key: KeychainService.googleCloudAPIKeyName) ?? "" }
+        set { KeychainService.save(key: KeychainService.googleCloudAPIKeyName, value: newValue) }
+    }
+
     init() {
         self.settingsService = SettingsService()
         self.settings = settingsService.loadSettings()
@@ -49,7 +55,8 @@ class AppState: ObservableObject {
 
     /// Fetches Google Cloud voices if API key is set
     func loadGoogleVoices() async {
-        guard !settings.googleCloudAPIKey.isEmpty else {
+        let apiKey = googleCloudAPIKey
+        guard !apiKey.isEmpty else {
             googleVoices = []
             return
         }
@@ -59,7 +66,7 @@ class AppState: ObservableObject {
 
         do {
             googleVoices = try await googleTTS.listVoices(
-                apiKey: settings.googleCloudAPIKey,
+                apiKey: apiKey,
                 languageCode: "en"
             )
         } catch {
@@ -117,7 +124,8 @@ class AppState: ObservableObject {
     }
 
     private func speakWithGoogle(text: String) async {
-        guard !settings.googleCloudAPIKey.isEmpty else {
+        let apiKey = googleCloudAPIKey
+        guard !apiKey.isEmpty else {
             errorMessage = "Google Cloud API key is not configured. Add it in Settings."
             return
         }
@@ -129,9 +137,9 @@ class AppState: ObservableObject {
                 voiceName: settings.googleVoiceName,
                 languageCode: settings.googleLanguageCode,
                 speakingRate: SpeechSettings.uiSpeedToGoogleRate(uiSpeed),
-                apiKey: settings.googleCloudAPIKey
+                apiKey: apiKey
             )
-            try speechEngine.playAudio(data: audioData)
+            try speechEngine.playAudio(data: audioData, text: text)
         } catch {
             errorMessage = error.localizedDescription
         }
@@ -176,12 +184,11 @@ class AppState: ObservableObject {
     // MARK: - Private Setup
 
     private func setupSpeechCallbacks() {
-        speechEngine.onProgress = { [weak self] progress, wordRange in
+        speechEngine.onProgress = { [weak self] progress, highlightRange in
             Task { @MainActor [weak self] in
                 self?.speechProgress = progress
-                // Only set word range if it's a valid range (system TTS)
-                if wordRange.location != NSNotFound {
-                    self?.currentWordRange = wordRange
+                if highlightRange.location != NSNotFound {
+                    self?.currentWordRange = highlightRange
                 }
             }
         }
