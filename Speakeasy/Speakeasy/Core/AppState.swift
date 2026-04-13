@@ -19,9 +19,12 @@ class AppState: ObservableObject {
     private let textExtractor: TextExtractor
     private let settingsService: SettingsService
     private let voiceDiscovery: VoiceDiscoveryService
+    let googleTTS = GoogleCloudTTSService()
 
     // Available voices
     @Published var availableVoices: [Voice] = []
+    @Published var googleVoices: [Voice] = []
+    @Published var isLoadingGoogleVoices = false
 
     init() {
         self.settingsService = SettingsService()
@@ -44,46 +47,93 @@ class AppState: ObservableObject {
         voiceDiscovery.voice(withIdentifier: settings.selectedVoiceIdentifier)
     }
 
+    /// Fetches Google Cloud voices if API key is set
+    func loadGoogleVoices() async {
+        guard !settings.googleCloudAPIKey.isEmpty else {
+            googleVoices = []
+            return
+        }
+
+        isLoadingGoogleVoices = true
+        defer { isLoadingGoogleVoices = false }
+
+        do {
+            googleVoices = try await googleTTS.listVoices(
+                apiKey: settings.googleCloudAPIKey,
+                languageCode: "en"
+            )
+        } catch {
+            log.error("Failed to fetch Google voices: \(error.localizedDescription)")
+            googleVoices = []
+        }
+    }
+
     // MARK: - Speech Control
 
     func speak(text: String) async {
         guard !text.isEmpty else { return }
 
-        // Clear previous errors
         errorMessage = nil
 
-        do {
-            // Extract text from URL if needed
-            let textToSpeak: String
-            if text.isValidURL {
-                do {
-                    textToSpeak = try await textExtractor.extractText(from: text)
-                } catch {
-                    errorMessage = "Failed to extract text from URL: \(error.localizedDescription)"
-                    return
-                }
-
-                // Check for empty extracted text
-                guard !textToSpeak.isEmpty else {
-                    errorMessage = "No readable text found at URL"
-                    return
-                }
-            } else {
-                textToSpeak = text
-            }
-
-            currentText = textToSpeak
-
-            // Speak with current settings
+        // Extract text from URL if needed
+        let textToSpeak: String
+        if text.isValidURL {
             do {
-                try await speechEngine.speak(
-                    text: textToSpeak,
-                    voiceIdentifier: settings.selectedVoiceIdentifier,
-                    rate: settings.speechRate
-                )
+                textToSpeak = try await textExtractor.extractText(from: text)
             } catch {
-                errorMessage = "Failed to speak text: \(error.localizedDescription)"
+                errorMessage = "Failed to extract text from URL: \(error.localizedDescription)"
+                return
             }
+
+            guard !textToSpeak.isEmpty else {
+                errorMessage = "No readable text found at URL"
+                return
+            }
+        } else {
+            textToSpeak = text
+        }
+
+        currentText = textToSpeak
+
+        // Route to the appropriate TTS engine
+        switch settings.ttsEngine {
+        case .system:
+            await speakWithSystem(text: textToSpeak)
+        case .googleCloud:
+            await speakWithGoogle(text: textToSpeak)
+        }
+    }
+
+    private func speakWithSystem(text: String) async {
+        do {
+            try await speechEngine.speak(
+                text: text,
+                voiceIdentifier: settings.selectedVoiceIdentifier,
+                rate: settings.speechRate
+            )
+        } catch {
+            errorMessage = "Failed to speak text: \(error.localizedDescription)"
+        }
+    }
+
+    private func speakWithGoogle(text: String) async {
+        guard !settings.googleCloudAPIKey.isEmpty else {
+            errorMessage = "Google Cloud API key is not configured. Add it in Settings."
+            return
+        }
+
+        do {
+            let uiSpeed = SpeechSettings.rateToUISpeed(settings.speechRate)
+            let audioData = try await googleTTS.synthesize(
+                text: text,
+                voiceName: settings.googleVoiceName,
+                languageCode: settings.googleLanguageCode,
+                speakingRate: SpeechSettings.uiSpeedToGoogleRate(uiSpeed),
+                apiKey: settings.googleCloudAPIKey
+            )
+            try speechEngine.playAudio(data: audioData)
+        } catch {
+            errorMessage = error.localizedDescription
         }
     }
 
@@ -129,7 +179,10 @@ class AppState: ObservableObject {
         speechEngine.onProgress = { [weak self] progress, wordRange in
             Task { @MainActor [weak self] in
                 self?.speechProgress = progress
-                self?.currentWordRange = wordRange
+                // Only set word range if it's a valid range (system TTS)
+                if wordRange.location != NSNotFound {
+                    self?.currentWordRange = wordRange
+                }
             }
         }
 
