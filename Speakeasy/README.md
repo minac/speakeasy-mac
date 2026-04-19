@@ -75,6 +75,7 @@ Speakeasy/
 │   │   └── TextExtractor.swift         # URL/HTML processing
 │   ├── Models/
 │   │   ├── SpeechSettings.swift        # Settings model
+│   │   ├── TTSEngine.swift             # TTS engine enum (system/Google Cloud)
 │   │   ├── Voice.swift                 # Voice wrapper
 │   │   └── PlaybackState.swift         # Playback states
 │   ├── Services/
